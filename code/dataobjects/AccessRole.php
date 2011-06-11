@@ -44,7 +44,7 @@ class AccessRole extends DataObject {
 
 			$role = new AccessRole;
 			$role->Title = 'Editor';
-			$role->Composes = array('View','Write','Create');
+			$role->Composes = array('View','Write','CreateChildren');
 			$role->write();
 		}
 	}
@@ -65,7 +65,7 @@ class AccessRole extends DataObject {
 		$fields->addFieldToTab('Root.Main', new MultiValueListField('Composes', _t('AccessRole.COMPOSES', 'Composes perms'), $options));
 		return $fields;
 	}
-	
+
 	public function onBeforeWrite() {
 		parent::onBeforeWrite();
 		if ($this->Title == 'Owner') {

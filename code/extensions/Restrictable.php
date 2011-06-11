@@ -375,10 +375,20 @@ class Restrictable extends DataObjectDecorator {
 	}
 
 	public function onBeforeWrite() {
+		// get the changed items first
+		$changed = $this->owner->getChangedFields(false, 2); 
+		
+		// set the owner now so that our perm check in a second works.
+		if (!$this->owner->OwnerID) {
+			$this->owner->OwnerID = Member::currentUserID();
+		}
+		
+		// don't allow write
 		if (!$this->checkPerm('Write')) {
 			throw new PermissionDeniedException('You must have write permission');
 		}
-		$changed = $this->owner->getChangedFields(false, 2); 
+
+		
 		$fields = $this->owner->fieldPermissions();
 		$fields['OwnerID'] = 'TakeOwnership';
 
@@ -393,9 +403,6 @@ class Restrictable extends DataObjectDecorator {
 			}
 		}
 
-		if (!$this->owner->OwnerID) {
-			$this->owner->OwnerID = Member::currentUserID();
-		}
 	}
 }
 
