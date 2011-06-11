@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Description of Restrictable
+ * An extension that adds role granting functionality
  *
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
@@ -23,24 +23,24 @@ class Restrictable extends DataObjectDecorator {
 		}
 		return $this->cache;
 	}
-	
+
 	public function extraStatics() {
 		return array(
-			'db'			=> array(
-				'InheritPerms'	=> 'Boolean',
-				'PublicAccess'	=> 'Boolean',
+			'db' => array(
+				'InheritPerms' => 'Boolean',
+				'PublicAccess' => 'Boolean',
 			),
-			'has_one'		=> array(
-				'Owner'			=> 'Member',
+			'has_one' => array(
+				'Owner' => 'Member',
 			),
-			'defaults'		=> array(
-				'InheritPerms'	=> true,
+			'defaults' => array(
+				'InheritPerms' => true,
 			),
 		);
 	}
 
 	public function getAuthorities() {
-		$filter = '"ItemID" = '. ((int) $this->owner->ID).' AND "ItemType" = \'' . Convert::raw2sql($this->owner->class) . '\'';
+		$filter = '"ItemID" = ' . ((int) $this->owner->ID) . ' AND "ItemType" = \'' . Convert::raw2sql($this->owner->class) . '\'';
 		$items = DataObject::get('AccessAuthority', $filter);
 		return $items;
 	}
@@ -61,11 +61,11 @@ class Restrictable extends DataObjectDecorator {
 
 		$type = $to instanceof Member ? 'Member' : 'Group';
 		$filter = array(
-			'Type ='			=> $type,
-			'AuthorityID ='		=> $to->ID,
-			'ItemID ='			=> $this->owner->ID,
-			'ItemType ='		=> $this->owner->class,
-			'Grant ='			=> $grant,
+			'Type =' => $type,
+			'AuthorityID =' => $to->ID,
+			'ItemID =' => $this->owner->ID,
+			'ItemType =' => $this->owner->class,
+			'Grant =' => $grant,
 		);
 
 		$existing = DataObject::get_one('AccessAuthority', singleton('SiteUtils')->dbQuote($filter));
@@ -104,7 +104,7 @@ class Restrictable extends DataObjectDecorator {
 	public function deny($perm, $to) {
 		return $this->grant($perm, $to, 'DENY');
 	}
-	
+
 	/**
 	 * Get the key for this item in the cache
 	 *
@@ -112,7 +112,7 @@ class Restrictable extends DataObjectDecorator {
 	 * @return string
 	 */
 	public function permCacheKey($perm) {
-		return md5($perm . '-' . $this->owner->ID . '-' .$this->owner->class);
+		return md5($perm . '-' . $this->owner->ID . '-' . $this->owner->class);
 	}
 
 	/**
@@ -134,18 +134,18 @@ class Restrictable extends DataObjectDecorator {
 		if (Permission::check('ADMIN')) {
 			return true;
 		}
-		
+
 		// if no member, just check public view
 		$public = $this->checkPublicPerms($perm);
 		if ($public) {
 			return true;
 		}
-		
+
 		// see whether we're the owner, and if the perm we're checking is in that list
 		if ($this->checkOwnerPerms($perm, $member)) {
 			return true;
 		}
-		
+
 		$permCache = $this->getCache();
 		/* @var $permCache Zend_Cache_Core */
 
@@ -155,7 +155,7 @@ class Restrictable extends DataObjectDecorator {
 		$userGrants = $permCache->load($key);
 
 		$directGrant = null;
-		
+
 		if ($userGrants && isset($userGrants[$member->ID])) {
 			$directGrant = $userGrants[$member->ID];
 		} else {
@@ -235,7 +235,7 @@ class Restrictable extends DataObjectDecorator {
 
 		return false;
 	}
-	
+
 	/**
 	 * Returns the effective parent of a given node for permission purposes
 	 * 
@@ -254,7 +254,7 @@ class Restrictable extends DataObjectDecorator {
 		}
 		return $permParent;
 	}
-	
+
 	/**
 	 * Checks the permissions for a public user
 	 * 
@@ -272,7 +272,7 @@ class Restrictable extends DataObjectDecorator {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Is the member the owner of this object, and is the permission being checked
 	 * in the list of permissions that owners have?
@@ -285,9 +285,9 @@ class Restrictable extends DataObjectDecorator {
 		if ($this->owner->OwnerID != $member->ID) {
 			return false;
 		}
-		
+
 		$cache = $this->getCache();
-		
+
 		$perms = $cache->load('ownerperms');
 		if (!$perms) {
 			// find the owner role and take the permissions of it 
@@ -304,13 +304,13 @@ class Restrictable extends DataObjectDecorator {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Allow users to specify an array of field level permission requirements on a content
 	 * object that will be checked when editing items. 
 	 * 
 	 * This should return an array (
-	 *		'FieldName'		=> 'RequiredPermission',
+	 * 		'FieldName'		=> 'RequiredPermission',
 	 * )
 	 * 
 	 */
@@ -318,31 +318,30 @@ class Restrictable extends DataObjectDecorator {
 		return array();
 	}
 
-	
 	public function canView($member=null) {
 		$res = $this->checkPerm('View', $member);
 		return $res;
 	}
-	
+
 	public function canEdit($member=null) {
 		$res = $this->checkPerm('Write', $member);
 		return $res;
 	}
-	
+
 	public function canDelete($member=null) {
 		$res = $this->checkPerm('Delete', $member);
 		return $res;
 	}
-	
+
 	public function canPublish($member=null) {
 		$res = $this->checkPerm('Publish', $member);
 		return $res;
 	}
-	
+
 	public function updateCMSFields(FieldSet $fields) {
 		// $controller, $name, $sourceClass, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = "", $sourceJoin = ""
 		$fieldPerms = $this->owner->fieldPermissions();
-		
+
 		foreach ($fieldPerms as $fieldId => $permission) {
 			if (!$this->checkPerm($permission)) {
 				// convert to a readonly field
@@ -360,7 +359,7 @@ class Restrictable extends DataObjectDecorator {
 				$fields->addFieldToTab('Root.Permissions', new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions')));
 				$fields->addFieldToTab('Root.Permissions', new CheckboxField('PublicAccess', _t('Restrictable.PUBLIC_ACCESS', 'Publicly Accessible')));
 			}
-			
+
 			if ($this->checkPerm('TakeOwnership')) {
 				$fields->addFieldToTab('Root.Permissions', new DropdownField('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title')));
 			}
@@ -373,37 +372,63 @@ class Restrictable extends DataObjectDecorator {
 			$fields->addFieldToTab('Root.Permissions', $table);
 		}
 	}
+	
+	/**
+	 * handles SiteTree::canAddChildren, useful for other types too
+	 */
+	public function canAddChildren() {
+		if ($this->checkPerm('CreateChildren')) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	public function onBeforeWrite() {
-		// get the changed items first
-		$changed = $this->owner->getChangedFields(false, 2); 
-		
-		// set the owner now so that our perm check in a second works.
-		if (!$this->owner->OwnerID) {
-			$this->owner->OwnerID = Member::currentUserID();
-		}
-		
-		// don't allow write
-		if (!$this->checkPerm('Write')) {
-			throw new PermissionDeniedException('You must have write permission');
-		}
-
-		
-		$fields = $this->owner->fieldPermissions();
-		$fields['OwnerID'] = 'TakeOwnership';
-
-		foreach ($changed as $field => $details) {
-			if (isset($fields[$field])) {
-				// check the permission				
-				if (!$this->checkPerm($fields[$field])) {
-					// this should never happen because the field should not be visible for editing 
-					// in the first place. 
-					throw new Exception("Invalid permissions to edit $field, ".$fields[$field]." required");
+		try {
+			// see if we're actually allowed to do this!
+			if (!$this->owner->ID) {
+				$parent = $this->effectiveParent();
+				if ($parent) {
+					// check create children
+					if (!$parent->canAddChildren()) {
+						throw new PermissionDeniedException('CreateChildren');
+					}
 				}
 			}
-		}
 
+			// get the changed items first
+			$changed = $this->owner->getChangedFields(false, 2);
+
+			// set the owner now so that our perm check in a second works.
+			if (!$this->owner->OwnerID) {
+				$this->owner->OwnerID = Member::currentUserID();
+			}
+
+			// don't allow write
+			if (!$this->checkPerm('Write')) {
+				throw new PermissionDeniedException('You must have write permission');
+			}
+
+			$fields = $this->owner->fieldPermissions();
+			$fields['OwnerID'] = 'TakeOwnership';
+
+			foreach ($changed as $field => $details) {
+				if (isset($fields[$field])) {
+					// check the permission				
+					if (!$this->checkPerm($fields[$field])) {
+						// this should never happen because the field should not be visible for editing 
+						// in the first place. 
+						throw new PermissionDeniedException("Invalid permissions to edit $field, " . $fields[$field] . " required");
+					}
+				}
+			}
+		} catch (PermissionDeniedException $pde) {
+			Security::permissionFailure();
+			throw $pde;
+		}
 	}
+
 }
 
 class PermissionDeniedException extends Exception {

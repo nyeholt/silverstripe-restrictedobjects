@@ -112,8 +112,11 @@ class TestRestrictedObject extends SapphireTest {
 		} catch (PHPUnit_Framework_ExpectationFailedException $fe) {
 			throw $fe;
 		} catch (Exception $e) {
+			// this should fail
 			$this->assertTrue(true);
 		}
+		
+		
 	}	
 }
 

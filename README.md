@@ -16,10 +16,11 @@ different to the existing model, and draws off the model seen in Alfresco
 The current model allows you to grant a role, made up of high level permission 
 concepts such as 'access the CMS', to a group on a site-wide basis, OR allow 
 a group edit/view access on a node. This new model allows you to specify
-much more fine grained access restrictions directly to a node or tree of 
-nodes, for example specifying a user can perform the Editor role (giving view
-and write access) to one part of the tree, but also Manager access (Editor plus
-Publish/Delete etc) to another part of the tree. 
+much more finely grained access restrictions directly to a node or tree of 
+nodes. For example, it is possible to specify that a user can perform the 
+Editor role (giving view and write access) in one part of the tree, but 
+also Manager access (Editor plus Publish/Delete etc) to another part of the 
+tree. 
 
 Additionally, you can explicitly DENY access to a node inside a tree where
 the user might already have been granted access at a higher point. 
@@ -45,3 +46,5 @@ Object::add_extension('Page', 'RestrictedPage');
 ```
 
 ## Usage Overview
+
+To begin with, 
