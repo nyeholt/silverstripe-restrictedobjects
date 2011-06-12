@@ -51,18 +51,7 @@ class AccessRole extends DataObject {
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
-		
-		$options = array();
-		$definers = ClassInfo::implementorsOf('PermissionDefiner');
-		$perms = array();
-		foreach ($definers as $definer) {
-			$cls = new $definer();
-			$perms = array_merge($perms, $cls->definePermissions());
-		}
-
-		$options = array_combine($perms, $perms);
-		
-		$fields->addFieldToTab('Root.Main', new MultiValueListField('Composes', _t('AccessRole.COMPOSES', 'Composes perms'), $options));
+		$fields->addFieldToTab('Root.Main', new MultiValueListField('Composes', _t('AccessRole.COMPOSES', 'Composes perms'), self::allPermissions()));
 		return $fields;
 	}
 
@@ -72,6 +61,19 @@ class AccessRole extends DataObject {
 			// a hack, but necessary for the moment...
 			singleton('Restrictable')->getCache()->remove('ownerperms');
 		}
+	}
+	
+	public static function allPermissions() {
+		$options = array();
+		$definers = ClassInfo::implementorsOf('PermissionDefiner');
+		$perms = array();
+		foreach ($definers as $definer) {
+			$cls = new $definer();
+			$perms = array_merge($perms, $cls->definePermissions());
+		}
+
+		return array_combine($perms, $perms);
+		
 	}
 }
 

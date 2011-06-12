@@ -25,6 +25,9 @@ tree.
 Additionally, you can explicitly DENY access to a node inside a tree where
 the user might already have been granted access at a higher point. 
 
+Finally, the new model supports the concept of a content owner, who has
+(almost) unrestricted access to content that they themselves have created 
+within areas that they have been allowed to create within. 
 
 ## Maintainer Contacts
 *  Marcus Nyeholt <marcus@silverstripe.com.au>
@@ -47,4 +50,22 @@ Object::add_extension('Page', 'RestrictedPage');
 
 ## Usage Overview
 
-To begin with, 
+Some default access roles are automatically created when you install the 
+system. These can be accessed via the Access Roles section.
+To define new roles, you simply create a new AccessRole item, and select
+the permissions you want to use within it. 
+
+Assigning roles are done from the "Permissions" tab of any content item.
+You can specify the role to assign for a user or a group, and whether you are
+granting or denying that role. You can also choose individual permissions
+to apply or revoke. 
+
+To define a new low-level permission item, you must define a class that 
+implements PermissionDefiner (not to be confused with the default
+SilverStripe interface PermissionProvider) and return a simple array of
+strings in the definePermissions() method. These strings should be the 
+permissions you check for in `$obj->checkPerm('CustomPerm');`
+
+
+
+

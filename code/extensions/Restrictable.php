@@ -85,6 +85,7 @@ class Restrictable extends DataObjectDecorator {
 			$new = array_merge($currentRoles, $composedOf);
 		}
 
+		$new = array_unique($new);
 		$existing->Perms = $new;
 		$existing->write();
 

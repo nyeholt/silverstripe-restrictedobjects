@@ -18,10 +18,14 @@ class PermissionTableField extends ComplexTableField {
 			$members = new CheckboxSetField('Members', _t('AccessAuthority.MEMBERS', 'Members'), DataObject::get('Member'));
 			$groups = new CheckboxSetField('Groups', _t('AccessAuthority.GROUPS', 'Groups'), DataObject::get('Group'));
 
-			$roles = new DropdownField('Role', _t('AccessAuthority.ROLE', 'Role'), DataObject::get('AccessRole')->map('Title', 'Title'));
+			$roles = new DropdownField('Role', _t('AccessAuthority.ROLE', 'Role'), DataObject::get('AccessRole')->map('Title', 'Title'), '', null, '(Role)');
 
+			// deliberately only allow singles here - people should define roles!
+			$perms = new DropdownField('Perms', _t('PermissionTable.PERMS', 'Permission - use roles for multiple!'), AccessRole::allPermissions(), '', null, '(Permission)');
+			
 			$detailFormFields = new FieldSet(
 				$roles,
+				$perms,
 				$members,
 				$groups,
 				new DropdownField('Grant', _t('AccessAuthority.Grant', 'Grant Access'), $dummy->dbObject('Grant')->enumValues())
@@ -52,19 +56,28 @@ class PermissionTableField extends ComplexTableField {
 			_t('ComplexTableField.CLOSEPOPUP', 'Close Popup')
 		);
 		
-		
 		if ($this->forObject->checkPerm('ChangePermissions')) {
 			if (isset($data['Members']) && is_array($data['Members'])) {
 				foreach ($data['Members'] as $memberId) {
 					$member = DataObject::get_by_id('Member', (int) $memberId);
-					$this->forObject->grant($data['Role'], $member, $data['Grant'] == 'GRANT' ? 'GRANT' : 'DENY');
+					if (strlen($data['Role'])) {
+						$this->forObject->grant($data['Role'], $member, $data['Grant'] == 'GRANT' ? 'GRANT' : 'DENY');
+					}
+					if (isset($data['Perms']) && strlen($data['Perms'])) {
+						$this->forObject->grant($data['Perms'], $member, $data['Grant'] == 'GRANT' ? 'GRANT' : 'DENY');
+					}
 				}
 			}
 
 			if (isset($data['Groups']) && is_array($data['Groups'])) {
 				foreach ($data['Groups'] as $groupId) {
 					$group = DataObject::get_by_id('Group', (int) $groupId);
-					$this->forObject->grant($data['Role'], $group, $data['Grant'] == 'GRANT' ? 'GRANT' : 'DENY');
+					if (strlen($data['Role'])) {
+						$this->forObject->grant($data['Role'], $group, $data['Grant'] == 'GRANT' ? 'GRANT' : 'DENY');
+					}
+					if (isset($data['Perms']) && strlen($data['Perms'])) {
+						$this->forObject->grant($data['Perms'], $group, $data['Grant'] == 'GRANT' ? 'GRANT' : 'DENY');
+					}
 				}
 			}
 			
