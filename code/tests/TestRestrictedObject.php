@@ -23,6 +23,7 @@ class TestRestrictedObject extends SapphireTest {
 	
 	public function setUp() {
 		parent::setUp();
+		Restrictable::set_enabled(true);
 		singleton('Restrictable')->getCache()->clean('all');
 	}
 	
@@ -44,7 +45,7 @@ class TestRestrictedObject extends SapphireTest {
 		$this->logInWithPermission('OTHERUSER');
 		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
 		
-		$user = $this->logInWithPermission('ADMIN');
+		$this->logInWithPermission('ADMIN');
 		$user = $this->cache_generatedMembers['ADMIN'];
 		
 		$item = new PrivateObject();
@@ -68,7 +69,6 @@ class TestRestrictedObject extends SapphireTest {
 		$otherItem->write();
 		
 		$this->logInWithPermission('OTHERUSER');
-		
 		$can = $otherItem->checkPerm('View');
 		
 		$this->assertTrue($can);
@@ -94,7 +94,7 @@ class TestRestrictedObject extends SapphireTest {
 		$this->logInWithPermission('OTHERUSER');
 		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
 		
-		$user = $this->logInWithPermission('NONADMIN');
+		$this->logInWithPermission('NONADMIN');
 		$user = $this->cache_generatedMembers['NONADMIN'];
 		
 		$item = new PrivateObject();
@@ -103,9 +103,14 @@ class TestRestrictedObject extends SapphireTest {
 
 		$this->assertTrue($item->OwnerID == $user->ID);
 		
-		$user = $this->logInWithPermission('OTHERUSER');
-		
-		$item->OwnerID = $user->ID;
+		$this->logInWithPermission('OTHERUSER');
+		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
+
+		// need to reload $item here so that ->original is stored properly
+		// otherwise it assumes we meant to do this all in the one user 
+		// request. 
+		$item = DataObject::get_by_id('PrivateObject', $item->ID);
+		$item->OwnerID = $otherUser->ID;
 		try {
 			$item->write();
 			$this->assertTrue(false);

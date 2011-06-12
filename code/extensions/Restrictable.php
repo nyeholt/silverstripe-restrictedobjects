@@ -12,6 +12,14 @@ class Restrictable extends DataObjectDecorator {
 	 * @var Zend_Cache_Core 
 	 */
 	protected $cache;
+	/**
+	 * @var boolean
+	 */
+	protected static $enabled = true;
+
+	public static function set_enabled($v = true) {
+		self::$enabled = $v;
+	}
 
 	/**
 	 *
@@ -126,7 +134,7 @@ class Restrictable extends DataObjectDecorator {
 	 */
 	public function checkPerm($perm, $member=null) {
 		if (!$member) {
-			$member = Member::currentUser();
+			$member = singleton('SecurityContext')->getMember();
 		}
 		if (is_int($member)) {
 			$member = DataObject::get_by_id('Member', $member);
@@ -140,6 +148,9 @@ class Restrictable extends DataObjectDecorator {
 		$public = $this->checkPublicPerms($perm);
 		if ($public) {
 			return true;
+		}
+		if (!$member) {
+			return false;
 		}
 
 		// see whether we're the owner, and if the perm we're checking is in that list
@@ -283,7 +294,12 @@ class Restrictable extends DataObjectDecorator {
 	 * @return boolean
 	 */
 	protected function checkOwnerPerms($perm, $member) {
-		if ($this->owner->OwnerID != $member->ID) {
+		$ownerId = $this->owner->OwnerID;
+		if ($this->owner->isChanged('OwnerID')) {
+			$changed = $this->owner->getChangedFields();
+			$ownerId = isset($changed['OwnerID']['before']) ? $changed['OwnerID']['before'] : $ownerId;
+		}
+		if (!$member || ($ownerId != $member->ID)) {
 			return false;
 		}
 
@@ -320,23 +336,31 @@ class Restrictable extends DataObjectDecorator {
 	}
 
 	public function canView($member=null) {
-		$res = $this->checkPerm('View', $member);
-		return $res;
+		if (self::$enabled) {
+			$res = $this->checkPerm('View', $member);
+			return $res;
+		}
 	}
 
 	public function canEdit($member=null) {
-		$res = $this->checkPerm('Write', $member);
-		return $res;
+		if (self::$enabled) {
+			$res = $this->checkPerm('Write', $member);
+			return $res;
+		}
 	}
 
 	public function canDelete($member=null) {
-		$res = $this->checkPerm('Delete', $member);
-		return $res;
+		if (self::$enabled) {
+			$res = $this->checkPerm('Delete', $member);
+			return $res;
+		}
 	}
 
 	public function canPublish($member=null) {
-		$res = $this->checkPerm('Publish', $member);
-		return $res;
+		if (self::$enabled) {
+			$res = $this->checkPerm('Publish', $member);
+			return $res;
+		}
 	}
 
 	public function updateCMSFields(FieldSet $fields) {
@@ -373,7 +397,7 @@ class Restrictable extends DataObjectDecorator {
 			$fields->addFieldToTab('Root.Permissions', $table);
 		}
 	}
-	
+
 	/**
 	 * handles SiteTree::canAddChildren, useful for other types too
 	 */
@@ -386,47 +410,49 @@ class Restrictable extends DataObjectDecorator {
 	}
 
 	public function onBeforeWrite() {
-		try {
-			// see if we're actually allowed to do this!
-			if (!$this->owner->ID) {
-				$parent = $this->effectiveParent();
-				if ($parent) {
-					// check create children
-					if (!$parent->canAddChildren()) {
-						throw new PermissionDeniedException('CreateChildren');
+		if (self::$enabled) {
+			try {
+				// see if we're actually allowed to do this!
+				if (!$this->owner->ID) {
+					$parent = $this->effectiveParent();
+					if ($parent) {
+						// check create children
+						if (!$parent->canAddChildren()) {
+							throw new PermissionDeniedException('CreateChildren');
+						}
 					}
 				}
-			}
 
-			// get the changed items first
-			$changed = $this->owner->getChangedFields(false, 2);
+				// get the changed items first
+				$changed = $this->owner->getChangedFields(false, 2);
 
-			// set the owner now so that our perm check in a second works.
-			if (!$this->owner->OwnerID) {
-				$this->owner->OwnerID = Member::currentUserID();
-			}
+				// set the owner now so that our perm check in a second works.
+				if (!$this->owner->OwnerID && singleton('SecurityContext')->getMember()) {
+					$this->owner->OwnerID = singleton('SecurityContext')->getMember()->ID;
+				}
 
-			// don't allow write
-			if (!$this->checkPerm('Write')) {
-				throw new PermissionDeniedException('You must have write permission');
-			}
+				// don't allow write
+				if (!$this->checkPerm('Write')) {
+					throw new PermissionDeniedException('You must have write permission');
+				}
 
-			$fields = $this->owner->fieldPermissions();
-			$fields['OwnerID'] = 'TakeOwnership';
+				$fields = $this->owner->fieldPermissions();
+				$fields['OwnerID'] = 'TakeOwnership';
 
-			foreach ($changed as $field => $details) {
-				if (isset($fields[$field])) {
-					// check the permission				
-					if (!$this->checkPerm($fields[$field])) {
-						// this should never happen because the field should not be visible for editing 
-						// in the first place. 
-						throw new PermissionDeniedException("Invalid permissions to edit $field, " . $fields[$field] . " required");
+				foreach ($changed as $field => $details) {
+					if (isset($fields[$field])) {
+						// check the permission				
+						if (!$this->checkPerm($fields[$field])) {
+							// this should never happen because the field should not be visible for editing 
+							// in the first place. 
+							throw new PermissionDeniedException("Invalid permissions to edit $field, " . $fields[$field] . " required");
+						}
 					}
 				}
+			} catch (PermissionDeniedException $pde) {
+				Security::permissionFailure();
+				throw $pde;
 			}
-		} catch (PermissionDeniedException $pde) {
-			Security::permissionFailure();
-			throw $pde;
 		}
 	}
 

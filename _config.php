@@ -7,3 +7,10 @@ if (($RESTRICTED_OBJECTS_DIR = basename(dirname(__FILE__))) != 'restrictedobject
 if (!class_exists('MultiValueField')) {
 	die('The restricted objects module requires the multivaluefield module from http://github.com/nyeholt/silverstripe-multivaluefield');
 }
+
+Object::add_extension('Member', 'RestrictedMember');
+
+// if we're in Dev, and have set "no initial checks", which is common during testing, disable perms
+if ((Director::isDev() || Director::is_cli()) && isset($_GET['disable_perms'])) {
+	Restrictable::set_enabled(false);
+}
