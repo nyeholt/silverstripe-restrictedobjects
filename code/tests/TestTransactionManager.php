@@ -49,13 +49,20 @@ class TestTransactionManager extends SapphireTest {
 		// touching the Session settings
 		$this->assertTrue(singleton('SecurityContext')->getMember()->ID == $second->ID);
 		$tm->run(array($this, 'updateAsOther'), $first, $item);
+		$item = DataObject::get_by_id('TransTestObj', $item->ID);
+		$this->assertEquals($item->Title, 'changed by second in subfunc');
+		
+		$tm->run(function () use ($item) {
+			$item->Title = 'changed by second again';
+			$item->write();
+		}, $first);
 		
 		$item = DataObject::get_by_id('TransTestObj', $item->ID);
-		$this->assertEquals($item->Title, 'changed by second in closure');
+		$this->assertEquals($item->Title, 'changed by second again');
 	}
 	
 	public function updateAsOther($item) {
-		$item->Title = 'changed by second in closure';
+		$item->Title = 'changed by second in subfunc';
 		$item->write();
 	}
 }
