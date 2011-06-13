@@ -2,7 +2,8 @@
 
 This module changes SilverStripe's object access module to be locked down
 as the default case, meaning that by default, there are NO permissions to
-an object except those explicitly granted to a user to a node (or tree)
+an object except those explicitly granted to a user on a node (or tree), with
+the exception of admin users, who always have full access to all objects)
 
 The new model of permission access has a few concepts that are slightly
 different to the existing model, and draws off the model seen in Alfresco
@@ -12,10 +13,16 @@ different to the existing model, and draws off the model seen in Alfresco
   permissions, these are the things checked against
 * Roles - Groupings of permissions. For example, an Editor role is made up 
   of the View and Edit permissions
+* Authority - a user or a group within the system
+* Grant - Being explicit about whether a user can or cannot do something 
+  (a permission is GRANTed or DENY'd to an authority)
 
-The current model allows you to grant a role, made up of high level permission 
-concepts such as 'access the CMS', to a group on a site-wide basis, OR allow 
-a group edit/view access on a node. This new model allows you to specify
+In the existing SilverStripe model, Roles and Permissions are high level 
+concepts without any context to the content in the system. They cover
+high level permission concepts such as 'access the CMS'. For node specific
+control, there is only explicit support for allowing View or Edit permission. 
+
+This new model allows you to specify
 much more finely grained access restrictions directly to a node or tree of 
 nodes. For example, it is possible to specify that a user can perform the 
 Editor role (giving view and write access) in one part of the tree, but 
@@ -36,6 +43,7 @@ within areas that they have been allowed to create within.
 * SilverStripe 2.4+
 
 ## Installation
+
 *  Place this directory in the root of your SilverStripe installation. Ensure
    that the folder name is `restrictedobjects`.
 *  Regenerate the manifest cache by visiting any page on your site with the
@@ -48,7 +56,44 @@ Object::add_extension('SiteConfig', 'Restrictable');
 Object::add_extension('Page', 'RestrictedPage');
 ```
 
-## Usage Overview
+## Typical use cases
+
+When would you want to use this model?
+
+From an end user perspective
+
+* You want to manage access to dataobjects with specificly structured 
+  permission sets
+* You want to grant certain access for specific authorities to one part of 
+  your site tree, but not to others, and those permissions are not just 
+  'read' or 'write'. 
+* You want to define roles that match organisational roles within tree
+  structures. 
+* You want to be able to deny specific authorities certain permissions 
+  within a section of the site tree, while leaving a broad set of permissions
+  granted above and below. 
+
+From a developer perspective
+
+* You want to define permissions that are specific to the functionality you
+  are managing, using verbs to describe the permissions, and nouns for the 
+  role that groups these permissions together. 
+* You want to ensure that the code you execute is checking access rights 
+  before nodes are accessed or modified
+* You want to avoid writing explicit code to manage custom permission
+  assignment for your own modules or sites
+
+## User documentation
+
+To manage permissions using the restricted objects module, there are a few 
+steps commonly performed
+
+* In the Access Roles section, create the relevant AccessRole, using the 
+  system defined permissions (see below for notes about default installed 
+  AccessRoles)
+* Navigate to the node (Page, or custom data object type) that you want 
+  permissions applied on. 
+* On the Permissions tab
 
 Some default access roles are automatically created when you install the 
 system. These can be accessed via the Access Roles section.
