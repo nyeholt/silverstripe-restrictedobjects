@@ -33,7 +33,7 @@ class DataService {
 		} else if (strpos($method, 'getAll') === 0) {
 			$call = 'getAll';
 		} else if (strpos($method, 'ById') > 0) {
-			$call = 'byId';
+			$call = 'ById';
 		}
 
 		if ($call) {
@@ -42,7 +42,7 @@ class DataService {
 
 		if ($type && class_exists($type)) {
 			array_unshift($arguments, $type);
-			return call_user_func_array(array($this, $call), $arguments);
+			return call_user_func_array(array($this, lcfirst($call)), $arguments);
 		}
 		throw new Exception("Cannot get objects of unknown type in $method");
 	}
@@ -53,7 +53,7 @@ class DataService {
 	
 	public function getOne($callerClass, $filter = "", $cache = true, $orderby = "") {
 		$item = DataObject::get_one($callerClass, $filter, $cache, $orderby);
-		if ($item->canView()) {
+		if ($item && $item->checkPerm('View')) {
 			return $item;
 		}
 	}
@@ -70,7 +70,7 @@ class DataService {
 	public static function byId($callerClass, $id, $cache = true) {
 		$id = (int) $id;
 		$item = DataObject::get_by_id($callerClass, $id, $cache);
-		if ($item->canView()) {
+		if ($item && $item->checkPerm('View')) {
 			return $item;
 		}
 	}
@@ -119,7 +119,7 @@ class DataService {
 			}
 			if(class_exists($record['RecordClassName'])) {
 				$item = new $record['RecordClassName']($record);
-				if ($item->canView()) {
+				if ($item->checkPerm('View')) {
 					$results[] = $item;
 				}
 			} else {
@@ -132,7 +132,7 @@ class DataService {
 				}
 				
 				$item = new $baseClass($record);
-				if ($item->canView()) {
+				if ($item->checkPerm('View')) {
 					$results[] = $item;
 				}
 			}

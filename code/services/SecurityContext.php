@@ -16,6 +16,9 @@ class SecurityContext {
 	}
 	
 	public function getMember() {
+		if (!$this->currentMember) {
+			$this->currentMember = Member::currentUser();
+		}
 		return $this->currentMember;
 	}
 	
