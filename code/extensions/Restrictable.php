@@ -378,23 +378,31 @@ class Restrictable extends DataObjectDecorator {
 			$table = new PermissionTableField($this->owner, 'Authorities', 'AccessAuthority');
 
 			$perms = array('show');
-
-			if ($this->owner->checkPerm('ChangePermissions')) {
-				$perms[] = 'add';
-				$fields->addFieldToTab('Root.Permissions', new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions')));
-				$fields->addFieldToTab('Root.Permissions', new CheckboxField('PublicAccess', _t('Restrictable.PUBLIC_ACCESS', 'Publicly Accessible')));
+			$rootTab = $fields->fieldByName('Root');
+			$addTo = null;
+			if ($rootTab) {
+				$addTo = $fields->findOrMakeTab('Root.Permissions');
 			}
+			// only add if we have a CMS backend!
+			if ($addTo) {
+				if ($this->owner->checkPerm('ChangePermissions')) {
+					$perms[] = 'add';
+					$addTo->push(new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions')));
+					$addTo->push(new CheckboxField('PublicAccess', _t('Restrictable.PUBLIC_ACCESS', 'Publicly Accessible')));
+				}
 
-			if ($this->checkPerm('TakeOwnership')) {
-				$fields->addFieldToTab('Root.Permissions', new DropdownField('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title')));
+				if ($this->checkPerm('TakeOwnership')) {
+					$addTo->push(new DropdownField('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title')));
+				}
+
+				if ($this->owner->checkPerm('DeletePermissions')) {
+					$perms[] = 'delete';
+				}
+
+				$table->setPermissions($perms);
+				$addTo->push($table);
 			}
-
-			if ($this->owner->checkPerm('DeletePermissions')) {
-				$perms[] = 'delete';
-			}
-
-			$table->setPermissions($perms);
-			$fields->addFieldToTab('Root.Permissions', $table);
+			
 		}
 	}
 
