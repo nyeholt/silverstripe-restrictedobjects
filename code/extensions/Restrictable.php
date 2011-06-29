@@ -379,9 +379,12 @@ class Restrictable extends DataObjectDecorator {
 
 			$perms = array('show');
 			$rootTab = $fields->fieldByName('Root');
+			$fileRootTab = $fields->fieldByName('BottomRoot');
 			$addTo = null;
 			if ($rootTab) {
 				$addTo = $fields->findOrMakeTab('Root.Permissions');
+			} else if ($fileRootTab) {
+				$addTo = $fields->findOrMakeTab('BottomRoot.Permissions');
 			}
 			// only add if we have a CMS backend!
 			if ($addTo) {
