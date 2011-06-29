@@ -52,6 +52,9 @@ class DataService {
 	}
 	
 	public function getOne($callerClass, $filter = "", $cache = true, $orderby = "") {
+		if (is_array($filter)) {
+			$filter = $this->dbQuote($filter);
+		}
 		$item = DataObject::get_one($callerClass, $filter, $cache, $orderby);
 		if ($item && $item->checkPerm('View')) {
 			return $item;
@@ -90,7 +93,9 @@ class DataService {
 		if(!DB::isActive()) {
 			throw new Exception("DataObjects have been requested before the database is ready. Please ensure your database connection details are correct, your database has been built, and that you are not trying to query the database in _config.php.");
 		}
-		
+		if (is_array($filter)) {
+			$filter = $this->dbQuote($filter);
+		}
 		$dummy = singleton($type);
 
 		$query = $dummy->extendedSQL($filter, $sort, $limit, $join);
@@ -141,5 +146,69 @@ class DataService {
 		if(isset($results)) {
 			return new $containerClass($results);
 		}
+	}
+	
+	
+	/**
+	 * Quote up a filter of the form
+	 *
+	 * array ("ParentID =" => 1)
+	 *
+	 * @param array $filter
+	 * @return string
+	 */
+	function dbQuote($filter = array(), $join = " AND ") {
+		$QUOTE_CHAR = defined('DB::USE_ANSI_SQL') ? '"' : '';
+
+		$string = '';
+		$sep = '';
+
+		foreach ($filter as $field => $value) {
+			// first break the field up into its two components
+			$operator = '';
+			if (is_string($field)) {
+				list($field, $operator) = explode(' ', trim($field));
+			}
+
+			$value = $this->recursiveQuote($value);
+
+			if (strpos($field, '.')) {
+				list($tb, $fl) = explode('.', $field);
+				$string .= $sep . $QUOTE_CHAR . $tb . $QUOTE_CHAR . '.' . $QUOTE_CHAR . $fl . $QUOTE_CHAR . " $operator " . $value;
+			} else {
+				if (is_numeric($field)) {
+					$string .= $sep . $value;
+				} else {
+					$string .= $sep . $QUOTE_CHAR . $field . $QUOTE_CHAR . " $operator " . $value;
+				}
+			}
+
+			$sep = $join;
+		}
+
+		return $string;
+	}
+
+	protected function recursiveQuote($val) {
+		if (is_array($val)) {
+			$return = array();
+			foreach ($val as $v) {
+				$return[] = $this->recursiveQuote($v);
+			}
+
+			return '('.implode(',', $return).')';
+		} else if (is_null($val)) {
+			$val = 'NULL';
+		} else if (is_int($val)) {
+			$val = (int) $val;
+		} else if (is_double($val)) {
+			$val = (double) $val;
+		} else if (is_float($val)) {
+			$val = (float) $val;
+		} else {
+			$val = "'" . Convert::raw2sql($val) . "'";
+		}
+
+		return $val;
 	}
 }
