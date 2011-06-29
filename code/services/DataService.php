@@ -165,8 +165,8 @@ class DataService {
 
 		foreach ($filter as $field => $value) {
 			// first break the field up into its two components
-			$operator = '';
-			if (is_string($field)) {
+			$operator = '=';
+			if (is_string($field) && strpos($field, ' ')) {
 				list($field, $operator) = explode(' ', trim($field));
 			}
 
