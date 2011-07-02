@@ -36,9 +36,7 @@ class AccessAuthority extends DataObject {
 		
 		$values = $this->Perms->getValues();
 		foreach ($values as $perm) {
-			$key = $this->getItem()->permCacheKey($perm);
-			// clear caching
-			singleton('Restrictable')->getCache()->remove($key);
+			singleton('PermissionService')->clearPermCacheFor($this->getItem(), $perm);
 		}
 	}
 }

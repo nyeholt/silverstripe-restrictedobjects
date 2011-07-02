@@ -59,7 +59,7 @@ class AccessRole extends DataObject {
 		parent::onBeforeWrite();
 		if ($this->Title == 'Owner') {
 			// a hack, but necessary for the moment...
-			singleton('Restrictable')->getCache()->remove('ownerperms');
+			singleton('PermissionService')->getCache()->remove('ownerperms');
 		}
 	}
 	

@@ -24,7 +24,7 @@ class TestRestrictedObject extends SapphireTest {
 	public function setUp() {
 		parent::setUp();
 		Restrictable::set_enabled(true);
-		singleton('Restrictable')->getCache()->clean('all');
+		singleton('PermissionService')->getCache()->clean('all');
 	}
 	
 	public function testGrant() {
