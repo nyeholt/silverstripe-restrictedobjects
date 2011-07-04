@@ -173,7 +173,6 @@ class Restrictable extends DataObjectDecorator {
 				$table->setPermissions($perms);
 				$addTo->push($table);
 			}
-			
 		}
 	}
 

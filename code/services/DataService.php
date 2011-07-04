@@ -47,10 +47,34 @@ class DataService {
 		throw new Exception("Cannot get objects of unknown type in $method");
 	}
 	
+	/**
+	 * 
+	 * Retrieve a list of data objects
+	 * 
+	 * @see DataObject::get()
+	 *
+	 * @param type $callerClass
+	 * @param string|array $filter
+	 *			
+	 * @param type $sort
+	 * @param type $join
+	 * @param type $limit
+	 * @param type $containerClass
+	 * @return DataObjectSet
+	 */
 	public function getAll($callerClass, $filter = "", $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet") {
 		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $containerClass);
 	}
 	
+	/**
+	 * Gets a single object
+	 *
+	 * @param type $callerClass
+	 * @param type $filter
+	 * @param type $cache
+	 * @param type $orderby
+	 * @return DataObject
+	 */
 	public function getOne($callerClass, $filter = "", $cache = true, $orderby = "") {
 		if (is_array($filter)) {
 			$filter = $this->dbQuote($filter);
@@ -61,7 +85,7 @@ class DataService {
 		}
 	}
 	
-		/**
+	/**
 	 * Return the given element, searching by ID
 	 *
 	 * @param string $callerClass The class of the object to be returned
@@ -70,10 +94,14 @@ class DataService {
 	 *
 	 * @return DataObject The element
 	 */
-	public static function byId($callerClass, $id, $cache = true) {
+	public function byId($callerClass, $id, $cache = true) {
 		$id = (int) $id;
 		$item = DataObject::get_by_id($callerClass, $id, $cache);
-		if ($item && $item->checkPerm('View')) {
+		if ($item && $item->hasExtension('Restrictable') && $item->checkPerm('View')) {
+			return $item;
+		}
+		
+		if ($item && $item->canView()) {
 			return $item;
 		}
 	}
@@ -195,7 +223,6 @@ class DataService {
 			foreach ($val as $v) {
 				$return[] = $this->recursiveQuote($v);
 			}
-
 			return '('.implode(',', $return).')';
 		} else if (is_null($val)) {
 			$val = 'NULL';

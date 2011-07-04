@@ -10,10 +10,22 @@
 class PermissionService {
 	
 	public function __construct() {
-		
 	}
 	
-	
+	/**
+	 * 
+	 * Allow this service to be accessed from the web
+	 *
+	 * @return array
+	 */
+	public function webEnabledMethods() {
+		return array(
+			'grant',
+			'checkPerm',
+			'getPermissionsFor',
+		);
+	}
+
 	/**
 	 * @var Zend_Cache_Core 
 	 */
@@ -34,7 +46,7 @@ class PermissionService {
 	public function getAllRoles() {
 		return DataObject::get('AccessRole');
 	}
-	
+
 	/**
 	 * Grants a specific permission to a given user or group
 	 *
@@ -42,6 +54,11 @@ class PermissionService {
 	 * @param Member|Group $to
 	 */
 	public function grant(DataObject $node, $perm, DataObject $to, $grant = 'GRANT') {
+		// make sure we can !!
+		if (!$this->checkPerm($node, 'ChangePermissions')) {
+			throw new PermissionDeniedException("You do not have permission to do that");
+		}
+
 		$role = DataObject::get_one('AccessRole', '"Title" = \'' . Convert::raw2sql($perm) . '\'');
 
 		$composedOf = array($perm);
@@ -265,6 +282,28 @@ class PermissionService {
 		}
 	}
 	
+	/**
+	 *
+	 * @param DataObject $node
+	 * @param boolean $includeInherited 
+	 *			Include inherited permissions in the list?
+	 */
+	public function getPermissionsFor(DataObject $node, $includeInherited = false) {
+		if ($this->checkPerm($node, 'ViewPermissions')) {
+			$authorities = $node->getAuthorities();
+			if (!$authorities) {
+				$authorities = new DataObjectSet();
+			} else {
+				foreach ($authorities as $authority) {
+					$auth = $authority->getAuthority();
+					$authority->DisplayName = $auth->getTitle();
+					$authority->PermList = implode(',', $authority->Perms->getValues());
+				}
+			}
+			return $authorities;
+		}
+	}
+
 	/**
 	 * Clear any cached permissions for this object
 	 *
