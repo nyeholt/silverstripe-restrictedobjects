@@ -26,4 +26,18 @@
 </script>
 
 <div id="AddAuthorityDialog" class="dialog">
+	<form method="post" action="">
+		<div>
+			<select name="role"></select> OR <select name="permission"></select>
+		</div>
+		<div>
+			<select name="member"></select> OR <select name="group"></select>
+		</div>
+		<div>
+			<select name="grant">
+				<option value="GRANT" selected="selected">Grant</option>
+				<option value="DENY">Deny</option>
+			</select>
+		</div>
+	</form>
 </div>

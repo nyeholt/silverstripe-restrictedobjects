@@ -7,7 +7,7 @@
 	$(function () {
 
 		var mainDialog = $('#PermissionManagementDialog');
-		var addPermDialog = $('#AddPermissionDialog');
+		var addPermDialog = $('#AddAuthorityDialog');
 
 		// we search for any .permissionManager, and get the info
 		$('.permissionManager').each(function () {
@@ -33,7 +33,7 @@
 					var addPermDialogOpts = {
 						width: 600,
 						height: 400,
-						modal: false,
+						modal: true,
 						buttons: [
 							{
 								text: 'Ok',
@@ -53,12 +53,11 @@
 					mainDialog.dialog({
 						width: 600,
 						height: 400,
-						modal: false,
+						modal: true,
 						buttons: [
 							{
 								text: 'Add',
 								click: function () {
-									alert(addPermDialog);
 									addPermDialog.dialog(addPermDialogOpts);
 								}
 							},

@@ -20,9 +20,9 @@ class PermissionService {
 	 */
 	public function webEnabledMethods() {
 		return array(
-			'grant',
-			'checkPerm',
-			'getPermissionsFor',
+			'grant'					=> 'POST',
+			'checkPerm'				=> 'GET',
+			'getPermissionsFor'		=> 'GET',
 		);
 	}
 
@@ -45,6 +45,33 @@ class PermissionService {
 	
 	public function getAllRoles() {
 		return DataObject::get('AccessRole');
+	}
+	
+	public function getPermissionDetails() {
+		return array(
+			'roles'				=> $this->getAllRoles(),
+			'permissions'		=> $this->allPermissions(),
+			'users'				=> DataObject::get('Member'),
+			'groups'			=> DataObject::get('Group')
+		);
+	}
+
+	protected $allPermissions;
+
+	public function allPermissions() {
+		if (!$this->allPermissions) {
+			$options = array();
+			$definers = ClassInfo::implementorsOf('PermissionDefiner');
+			$perms = array();
+			foreach ($definers as $definer) {
+				$cls = new $definer();
+				$perms = array_merge($perms, $cls->definePermissions());
+			}
+
+			$this->allPermissions = array_combine($perms, $perms);
+		}
+
+		return $this->allPermissions;
 	}
 
 	/**
