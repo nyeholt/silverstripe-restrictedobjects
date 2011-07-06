@@ -141,6 +141,7 @@ class PermissionService {
 		if (!$member) {
 			$member = singleton('SecurityContext')->getMember();
 		}
+
 		if (is_int($member)) {
 			$member = DataObject::get_by_id('Member', $member);
 		}
@@ -151,6 +152,7 @@ class PermissionService {
 
 		// if no member, just check public view
 		$public = $this->checkPublicPerms($node, $perm);
+
 		if ($public) {
 			return true;
 		}

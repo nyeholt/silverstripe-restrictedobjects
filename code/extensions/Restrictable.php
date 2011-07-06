@@ -98,9 +98,26 @@ class Restrictable extends DataObjectDecorator {
 	 * 		'FieldName'		=> 'RequiredPermission',
 	 * )
 	 * 
+	 * Typically this is called directly in the extension so that OwnerID is always specified. 
+	 * 
 	 */
 	public function fieldPermissions() {
-		return array();
+		// so we can pass around by ref and not worry about end users NOT
+		// using &$fields in their code...
+		$fieldPerms = new ArrayObject();
+
+		if (method_exists($this->owner, 'fieldPermissions')) {
+			$fieldPerms = $this->owner->fieldPermissions();
+			if (!is_array($fieldPerms)) {
+				// force it to be an array
+				$fieldPerms = new ArrayObject();
+			}
+		}
+
+		$fieldPerms['OwnerID'] = 'TakeOwnership';
+		$this->owner->extend('updateFieldPermissions', $fieldPerms);
+
+		return $fieldPerms;
 	}
 
 	public function canView($member=null) {
@@ -133,12 +150,17 @@ class Restrictable extends DataObjectDecorator {
 
 	public function updateCMSFields(FieldSet $fields) {
 		// $controller, $name, $sourceClass, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = "", $sourceJoin = ""
-		$fieldPerms = $this->owner->fieldPermissions();
+		$fieldPerms = $this->fieldPermissions();
 
+		// first, make a field readonly if there's no permission to edit it
 		foreach ($fieldPerms as $fieldId => $permission) {
 			if (!$this->checkPerm($permission)) {
 				// convert to a readonly field
-				$fields->makeFieldReadonly($fieldId);
+				$hasField = $fields->dataFieldByName($fieldId);
+				if ($hasField) {
+					$fields->makeFieldReadonly($fieldId);
+				}
+				
 			}
 		}
 
@@ -214,8 +236,8 @@ class Restrictable extends DataObjectDecorator {
 					throw new PermissionDeniedException('You must have write permission');
 				}
 
-				$fields = $this->owner->fieldPermissions();
-				$fields['OwnerID'] = 'TakeOwnership';
+				$fields = $this->fieldPermissions();
+				
 
 				foreach ($changed as $field => $details) {
 					if (isset($fields[$field])) {

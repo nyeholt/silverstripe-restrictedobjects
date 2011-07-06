@@ -17,11 +17,16 @@ class SecurityContext {
 	
 	public function getMember() {
 		if (!$this->currentMember) {
-			$this->currentMember = Member::currentUser();
+			if (Member::currentUserID()) {
+				$this->currentMember = Member::currentUser();
+			} else {
+				// ignore this for now!
+//				$this->currentMember = singleton('PublicMember');
+			}
 		}
 		return $this->currentMember;
 	}
-	
+
 	public function setMember($member) {
 		$this->currentMember = $member;
 	}

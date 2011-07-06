@@ -73,7 +73,6 @@ class AccessRole extends DataObject {
 		}
 
 		return array_combine($perms, $perms);
-		
 	}
 }
 
