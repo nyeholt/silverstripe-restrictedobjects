@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Description of RestrictedPage
+ * A helper for making pages restricted by allowing perm lookups 
+ * for pages to make use of the site config too
  *
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/

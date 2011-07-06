@@ -18,8 +18,12 @@ class AccessAuthority extends DataObject {
 	);
 
 	public function getAuthority() {
-		if ($this->Type && $this->AuthorityID) {
+		if ($this->Type && $this->AuthorityID > 0) {
 			return DataObject::get_by_id($this->Type, $this->AuthorityID);
+		}
+
+		if ($this->AuthorityID == -1) {
+			return singleton('PublicMember');
 		}
 	}
 	

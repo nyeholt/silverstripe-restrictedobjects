@@ -29,9 +29,13 @@ class AccessRole extends DataObject {
 			$role->Composes = $dp;
 			$role->write();
 			
+			$ownerPerms = $dp;
+			// get rid of publish from owners
+			unset($ownerPerms[4]);
+			
 			$role = new AccessRole;
 			$role->Title = 'Owner';
-			$role->Composes = $dp;
+			$role->Composes = $ownerPerms;
 			$role->write();
 
 			unset($dp[count($dp) - 1]);
@@ -73,7 +77,6 @@ class AccessRole extends DataObject {
 		}
 
 		return array_combine($perms, $perms);
-		
 	}
 }
 

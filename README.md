@@ -46,8 +46,9 @@ within areas that they have been allowed to create within.
 
 *  Place this directory in the root of your SilverStripe installation. Ensure
    that the folder name is `restrictedobjects`.
-*  Regenerate the manifest cache by visiting any page on your site with the
-   `?flush` URL parameter set.
+*  Run dev/build with the ?disable_perms=1 parameter - in dev mode, permissions
+   can be disabled by using this flag, which is needed to ensure things are 
+   installed correctly
 * Assign the extensions
   
 ```php
