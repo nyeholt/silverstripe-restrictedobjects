@@ -23,6 +23,7 @@ class PermissionService {
 			'grant'					=> 'POST',
 			'checkPerm'				=> 'GET',
 			'getPermissionsFor'		=> 'GET',
+			'getPermissionDetails'	=> 'GET'
 		);
 	}
 

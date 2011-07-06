@@ -10,8 +10,8 @@
 		var addPermDialog = $('#AddAuthorityDialog');
 
 		// we search for any .permissionManager, and get the info
-		$('.permissionManager').each(function () {
-			var nodeInfo = $(this).data('data-object');
+		$('.permissionManager').livequery(function () {
+			var nodeInfo = $(this).data('object');
 			
 			$(this).click (function () {
 				initialiseDialog(nodeInfo);
@@ -26,10 +26,10 @@
 			}
 
 			$.get(service + '/getPermissionsFor', params, function (data) {
-				if (data && data.items) {
+				if (data && data.response.items) {
 					mainDialog.find('table.currentAuthorities tbody').empty();
-					$('#PermissionTableRowTemplate').tmpl(data.items).appendTo(mainDialog.find('table.currentAuthorities tbody'));
-					
+					$('#PermissionTableRowTemplate').tmpl(data.response.items).appendTo(mainDialog.find('table.currentAuthorities tbody'));
+
 					var addPermDialogOpts = {
 						width: 600,
 						height: 400,
