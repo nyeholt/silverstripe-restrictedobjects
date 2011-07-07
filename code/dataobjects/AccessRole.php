@@ -68,14 +68,7 @@ class AccessRole extends DataObject {
 	}
 	
 	public static function allPermissions() {
-		$options = array();
-		$definers = ClassInfo::implementorsOf('PermissionDefiner');
-		$perms = array();
-		foreach ($definers as $definer) {
-			$cls = new $definer();
-			$perms = array_merge($perms, $cls->definePermissions());
-		}
-
+		$perms = singleton('PermissionService')->allPermissions();
 		return array_combine($perms, $perms);
 	}
 }

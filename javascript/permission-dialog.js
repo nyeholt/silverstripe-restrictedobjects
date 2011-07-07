@@ -1,13 +1,27 @@
 
 ;(function ($) {
 	
-	var service = 'jsonservice/permission/';
+	var service = 'jsonservice/permission';
 	var securityId = $('input[name=SecurityID]').val();
 	
 	$(function () {
 
 		var mainDialog = $('#PermissionManagementDialog');
 		var addPermDialog = $('#AddAuthorityDialog');
+		
+		var params = {
+			SecurityID: securityId
+		};
+		$.get(service + '/getPermissionDetails', params, function (data) {
+			// populate stuff!
+			if (data && data.response) {
+				var res = data.response;
+				var options = $.tmpl('<option value="${Title}">${Title}</option>', res.roles.items);
+				$('select[name=role]').append(options);
+				var options = $.tmpl('<option value="${$data}">${$data}</option>', res.permissions);
+				$('select[name=permission]').append(options);
+			}
+		});
 
 		// we search for any .permissionManager, and get the info
 		$('.permissionManager').livequery(function () {
@@ -24,6 +38,7 @@
 				nodeID: nodeInfo.ID, 
 				nodeType: nodeInfo.Type
 			}
+			
 
 			$.get(service + '/getPermissionsFor', params, function (data) {
 				if (data && data.response.items) {

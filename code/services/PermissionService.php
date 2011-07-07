@@ -69,7 +69,7 @@ class PermissionService {
 				$perms = array_merge($perms, $cls->definePermissions());
 			}
 
-			$this->allPermissions = array_combine($perms, $perms);
+			$this->allPermissions = $perms;
 		}
 
 		return $this->allPermissions;
