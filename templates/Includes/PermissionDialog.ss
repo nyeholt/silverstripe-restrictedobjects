@@ -3,7 +3,7 @@
 <% require javascript(restrictedobjects/javascript/jquery.tmpl.min.js) %>
 <% require css(restrictedobjects/css/permission-dialog.css) %>
 
-<div id="PermissionManagementDialog" class="dialog">
+<div id="PermissionManagementDialog" class="dialog" title="Permissions">
 	<table class="currentAuthorities">
 		<thead>
 			<tr>

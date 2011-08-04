@@ -26,7 +26,6 @@
 		// we search for any .permissionManager, and get the info
 		$('.permissionManager').livequery(function () {
 			var nodeInfo = $(this).data('object');
-			
 			$(this).click (function () {
 				initialiseDialog(nodeInfo);
 			})
@@ -38,7 +37,6 @@
 				nodeID: nodeInfo.ID, 
 				nodeType: nodeInfo.Type
 			}
-			
 
 			$.get(service + '/getPermissionsFor', params, function (data) {
 				if (data && data.response.items) {
@@ -64,7 +62,7 @@
 							}
 						]
 					};
-					
+
 					mainDialog.dialog({
 						width: 600,
 						height: 400,
