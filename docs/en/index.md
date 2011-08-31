@@ -76,5 +76,3 @@ The module provides several different layers to help address these issues
 * Simple mechanism for defining new low level permissions
 * Interface for creating and managing roles
 * Interface for applying and managing permissions within the tree
-
-[Getting Started]

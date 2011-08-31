@@ -57,6 +57,10 @@ Object::add_extension('SiteConfig', 'Restrictable');
 Object::add_extension('Page', 'RestrictedPage');
 ```
 
+* Run dev/build again, login to your system as an admin
+* On your "Site" object, make sure the "Allow public access" checkbox is
+  enabled so that the site is still viewable.
+
 ## Typical use cases
 
 When would you want to use this model?
@@ -84,7 +88,7 @@ From a developer perspective
 * You want to avoid writing explicit code to manage custom permission
   assignment for your own modules or sites
 
-## User documentation
+## Quick start
 
 To manage permissions using the restricted objects module, there are a few 
 steps commonly performed
