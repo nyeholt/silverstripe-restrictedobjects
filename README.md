@@ -89,12 +89,16 @@ From a developer perspective
 To manage permissions using the restricted objects module, there are a few 
 steps commonly performed
 
-* In the Access Roles section, create the relevant AccessRole, using the 
-  system defined permissions (see below for notes about default installed 
-  AccessRoles)
-* Navigate to the node (Page, or custom data object type) that you want 
-  permissions applied on. 
-* On the Permissions tab
+* Navigate to the node (SiteConfig, Page, or custom data object type) that 
+  you want permissions applied on. 
+* On the Permissions tab, click "Add Access Authority"
+* Select the role to give the user. This will give them the permissions
+  defined for this role in the Access Roles section of the CMS
+* Select which members or groups to grant this role for
+* Select whether to GRANT or DENY this permission
+* Click "Save"
+* Once the permission table refreshes, you will see all the permissions
+  granted for that "Authority". 
 
 Some default access roles are automatically created when you install the 
 system. These can be accessed via the Access Roles section.
@@ -112,6 +116,7 @@ SilverStripe interface PermissionProvider) and return a simple array of
 strings in the definePermissions() method. These strings should be the 
 permissions you check for in `$obj->checkPerm('CustomPerm');`
 
-
+See the (wiki)[https://github.com/nyeholt/silverstripe-restrictedobjects/wiki]
+for more.
 
 
