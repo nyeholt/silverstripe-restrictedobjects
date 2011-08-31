@@ -15,7 +15,6 @@ class AccessRole extends DataObject {
 	
 	public function requireDefaultRecords() {
 		parent::requireDefaultRecords();
-		if (Director::isDev() || Director::isTest()) {
 			$existing = DataObject::get('AccessRole');
 			if ($existing && $existing->count()) {
 				return;
@@ -50,7 +49,6 @@ class AccessRole extends DataObject {
 			$role->Title = 'Editor';
 			$role->Composes = array('View','Write','CreateChildren');
 			$role->write();
-		}
 	}
 
 	public function getCMSFields() {
@@ -68,14 +66,7 @@ class AccessRole extends DataObject {
 	}
 	
 	public static function allPermissions() {
-		$options = array();
-		$definers = ClassInfo::implementorsOf('PermissionDefiner');
-		$perms = array();
-		foreach ($definers as $definer) {
-			$cls = new $definer();
-			$perms = array_merge($perms, $cls->definePermissions());
-		}
-
+		$perms = singleton('PermissionService')->allPermissions();
 		return array_combine($perms, $perms);
 	}
 }

@@ -1,15 +1,14 @@
-
 # Restricted objects module
 
 
 This module is based around the idea that code such as the following
 
-:::php
+
 	DataObject::get('MyObject');
 
 
-is inherently insecure because it relies on the developer explicitly
-filtering the result set manually. This is similar in respect to the problems
+is inherently insecure because it relies on the end-developer explicitly
+filtering the result set manually. This is similar in one respect to the problems
 of SQL injection, CSRF and XSS vulnerabilities - a framework should protect
 its end users from these problems as much as possible, and NOT rely on 
 its end users (in a framework, end users being developers) to always do the 
@@ -20,12 +19,15 @@ that does permission management at the moment is a very manual, inconsistent
 process. The CMS itself is a good example of this - it has explicit separate 
 content relationships to manage access (ViewerGroups, EditorGroups etc) which
 are incompatible with other content types (eg File, custom data objects) and
-(I find at least from talking with clients) confusing in their behaviour. In
+(I find from talking with clients) confusing in their behaviour. In
 addition to this, Sapphire has another layer of permission definition with the
 sectional access rights (eg Access to all CMS sections) which in some cases
-override content permissions and other times don't. As well as the capability
-of granting access to trees, it allows the explicit denial of access to 
-otherwise granted access. 
+override content permissions and other times don't. This module solves the 
+first issue of permission management on dataobjects, leaving the sectional
+access rights as they currently exist. As well as the capability
+of granting access to content trees, it allows the explicit denial of access 
+for specific subsets (or individual) users that might have access granted
+at a higher level. 
 
 Finally, it introduces the concept of content ownership to the system, whereby
 someone who is the owner of a piece of content always has a specific set of
@@ -34,25 +36,25 @@ permissions to content they own (but not the ability to publish it).
 The basis of the module is that all code should be written with the idea that
 that permission checks be made against low level permissions such as
 
-:::php 
 
-class DefaultPermissions implements PermissionDefiner {
-	public function definePermissions() {
-		return array(
-			'View',
-			'Write',
-			'Delete',
-			'CreateChildren',
-			'Publish',
-			'UnPublish',
-			'ViewPermissions',
-			'ChangePermissions',
-			'DeletePermissions',
-			'TakeOwnership',
-			'Configure',
-		);
+
+	class DefaultPermissions implements PermissionDefiner {
+		public function definePermissions() {
+			return array(
+				'View',
+				'Write',
+				'Delete',
+				'CreateChildren',
+				'Publish',
+				'UnPublish',
+				'ViewPermissions',
+				'ChangePermissions',
+				'DeletePermissions',
+				'TakeOwnership',
+				'Configure',
+			);
+		}
 	}
-}
 
 CMS administrators then have the ability to bundle these low level permissions 
 into meaningful roles which can be applied to specific sections of the site.
@@ -76,3 +78,4 @@ The module provides several different layers to help address these issues
 * Simple mechanism for defining new low level permissions
 * Interface for creating and managing roles
 * Interface for applying and managing permissions within the tree
+

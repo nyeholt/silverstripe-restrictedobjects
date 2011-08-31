@@ -215,7 +215,7 @@ class Restrictable extends DataObjectDecorator {
 				// see if we're actually allowed to do this!
 				if (!$this->owner->ID) {
 					$parent = $this->effectiveParent();
-					if ($parent) {
+					if ($parent && $parent->ID) {
 						// check create children
 						if (!$parent->canAddChildren()) {
 							throw new PermissionDeniedException('CreateChildren');
