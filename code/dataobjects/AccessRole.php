@@ -15,7 +15,6 @@ class AccessRole extends DataObject {
 	
 	public function requireDefaultRecords() {
 		parent::requireDefaultRecords();
-		if (Director::isDev() || Director::isTest()) {
 			$existing = DataObject::get('AccessRole');
 			if ($existing && $existing->count()) {
 				return;
@@ -50,7 +49,6 @@ class AccessRole extends DataObject {
 			$role->Title = 'Editor';
 			$role->Composes = array('View','Write','CreateChildren');
 			$role->write();
-		}
 	}
 
 	public function getCMSFields() {
