@@ -287,7 +287,7 @@ class PermissionService {
 		$ownerId = $node->OwnerID;
 		if ($node->isChanged('OwnerID')) {
 			$changed = $node->getChangedFields();
-			$ownerId = isset($changed['OwnerID']['before']) ? $changed['OwnerID']['before'] : $ownerId;
+			$ownerId = isset($changed['OwnerID']['before']) && $changed['OwnerID']['before'] ? $changed['OwnerID']['before'] : $ownerId;
 		}
 		if (!$member || ($ownerId != $member->ID)) {
 			return false;
