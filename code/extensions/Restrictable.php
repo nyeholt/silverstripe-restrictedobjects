@@ -218,7 +218,7 @@ class Restrictable extends DataObjectDecorator {
 					if ($parent && $parent->ID) {
 						// check create children
 						if (!$parent->canAddChildren()) {
-							throw new PermissionDeniedException('CreateChildren');
+							throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
 						}
 					}
 				}
@@ -233,7 +233,7 @@ class Restrictable extends DataObjectDecorator {
 
 				// don't allow write
 				if (!$this->checkPerm('Write')) {
-					throw new PermissionDeniedException('You must have write permission');
+					throw new PermissionDeniedException('Write', 'You must have write permission');
 				}
 
 				$fields = $this->fieldPermissions();
@@ -245,7 +245,7 @@ class Restrictable extends DataObjectDecorator {
 						if (!$this->checkPerm($fields[$field])) {
 							// this should never happen because the field should not be visible for editing 
 							// in the first place. 
-							throw new PermissionDeniedException("Invalid permissions to edit $field, " . $fields[$field] . " required");
+							throw new PermissionDeniedException('Write', "Invalid permissions to edit $field, " . $fields[$field] . " required");
 						}
 					}
 				}

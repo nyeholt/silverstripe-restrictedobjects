@@ -358,5 +358,7 @@ class PermissionService {
 }
 
 class PermissionDeniedException extends Exception {
-	
+	public function __construct($permission, $message, $code, $previous) {
+		parent::__construct($message . ' ' . $permission, $code, $previous);
+	}
 }
