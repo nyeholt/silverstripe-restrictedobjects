@@ -239,3 +239,13 @@ class DataService {
 		return $val;
 	}
 }
+
+
+if (!function_exists('lcfirst')) {
+	function lcfirst($str) {
+		if (strlen($str) > 0) {
+			return strtolower($str{0}) . substr($str, 1);
+		}
+		return $str;
+	}
+}
