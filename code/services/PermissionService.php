@@ -21,6 +21,7 @@ class PermissionService {
 	public function webEnabledMethods() {
 		return array(
 			'grant'					=> 'POST',
+			'grantTo'				=> 'POST',
 			'checkPerm'				=> 'GET',
 			'getPermissionsFor'		=> 'GET',
 			'getPermissionDetails'	=> 'GET'
@@ -52,8 +53,8 @@ class PermissionService {
 		return array(
 			'roles'				=> $this->getAllRoles(),
 			'permissions'		=> $this->allPermissions(),
-			'users'				=> DataObject::get('Member'),
-			'groups'			=> DataObject::get('Group')
+//			'users'				=> DataObject::get('Member'),
+//			'groups'			=> DataObject::get('Group')
 		);
 	}
 
@@ -75,6 +76,31 @@ class PermissionService {
 		return $this->allPermissions;
 	}
 
+	/**
+	 * Alternative grant method using group name or email address
+	 *
+	 * @param DataObject $node
+	 * @param type $perm
+	 * @param DataObject $to
+	 * @param type $grant 
+	 */
+	public function grantTo(DataObject $node, $perm, $email, $group, $grant = 'GRANT') {
+		$userObj = $groupObj = null;
+		if (strlen($email)) {
+			$userObj = DataObject::get_one('Member', '"Email" = \''. Convert::raw2sql($email).'\'');
+		} else if (strlen($group)) {
+			$groupObj = DataObject::get_one('Organisation', '"Title" = \'' . Convert::raw2sql($group).'\'');
+		}
+
+		$to = $userObj ? $userObj : $groupObj;
+		
+		if (!$to) {
+			return array('status' => false, 'message' => 'Unknown authority');
+		}
+		
+		return $this->grant($node, $perm, $to, $grant);
+	}
+	
 	/**
 	 * Grants a specific permission to a given user or group
 	 *
@@ -128,6 +154,8 @@ class PermissionService {
 			$key = $this->permCacheKey($node, $perm);
 			$this->getCache()->remove($key);
 		}
+		
+		return $existing;
 	}
 	
 	/**
@@ -326,8 +354,13 @@ class PermissionService {
 			} else {
 				foreach ($authorities as $authority) {
 					$auth = $authority->getAuthority();
-					$authority->DisplayName = $auth->getTitle();
-					$authority->PermList = implode(',', $authority->Perms->getValues());
+					if ($auth) {
+						$authority->DisplayName = $auth->getTitle();
+						$authority->PermList = implode(',', $authority->Perms->getValues());
+					} else {
+						$authority->DisplayName = 'INVALID AUTHORITY: #' . $authority->ID;
+					}
+					
 				}
 			}
 			return $authorities;

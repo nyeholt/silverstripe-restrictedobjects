@@ -28,12 +28,15 @@
 <div id="AddAuthorityDialog" class="dialog">
 	<form method="post" action="">
 		<div>
-			<select name="role"></select> OR <select name="permission"></select>
+			<label for="role">Role</label><select name="role"></select> 
+			<label for="permission">or permission</label><select name="permission"></select>
 		</div>
 		<div>
-			<select name="member"></select> OR <select name="group"></select>
+			<label class="userLabel">User email address</label><input name="MemberName" /> 
+			<label class="groupLabel">or enter group</label><input name="GroupName" />
 		</div>
 		<div>
+			<label for="grantType">For permission</label>
 			<select name="grant">
 				<option value="GRANT" selected="selected">Grant</option>
 				<option value="DENY">Deny</option>

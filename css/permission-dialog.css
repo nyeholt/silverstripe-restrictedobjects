@@ -2,3 +2,21 @@
 .dialog {
 	display: none;
 }
+
+#AddAuthorityDialog label {
+	font-size: 10px;
+	display: inline-block;
+	width: 100px;
+}
+
+#AddAuthorityDialog select, #AddAuthorityDialog input {
+	width: 100px;
+}
+
+#AddAuthorityDialog select {
+	width: 110px;
+}
+
+#AddAuthorityDialog div {
+	margin-bottom: 10px;
+}
