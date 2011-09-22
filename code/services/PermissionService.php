@@ -20,7 +20,7 @@ class PermissionService {
 	 */
 	public function webEnabledMethods() {
 		return array(
-			'grant'					=> 'POST',
+			'removeAuthority'		=> 'POST',
 			'grantTo'				=> 'POST',
 			'checkPerm'				=> 'GET',
 			'getPermissionsFor'		=> 'GET',
@@ -99,6 +99,23 @@ class PermissionService {
 		}
 		
 		return $this->grant($node, $perm, $to, $grant);
+	}
+	
+	/**
+	 * Delete an authority
+	 *
+	 * @param DataObject $node 
+	 *			The node to delete from
+	 * @param DataObject $authority
+	 *			The AccessAuthority we're removing
+	 */
+	public function removeAuthority(DataObject $node, DataObject $authority) {
+		if (!$this->checkPerm($node, 'DeletePermissions')) {
+			throw new PermissionDeniedException("You do not have permission to do that");
+		}
+
+		$authority->delete();
+		return $node;
 	}
 	
 	/**

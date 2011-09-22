@@ -32,7 +32,7 @@
 				initialiseDialog(nodeInfo);
 			})
 		})
-
+		
 		function initialiseDialog(nodeInfo) {
 			var params = {
 				SecurityID: securityId, 
@@ -69,7 +69,7 @@
 										alert(data.response.message);
 									} else {
 										console.log(data.response);
-										$(this).dialog('close');
+										$(addPermDialog).dialog('close');
 										loadMainDialog();
 									}
 								}
@@ -88,15 +88,43 @@
 			loadMainDialog();
 			
 			function loadMainDialog() {
+				
 				$.get(service + '/getPermissionsFor', params, function (data) {
 					if (data && data.response) {
 						mainDialog.find('table.currentAuthorities tbody').empty();
 						$('#PermissionTableRowTemplate').tmpl(data.response.items).appendTo(mainDialog.find('table.currentAuthorities tbody'));
+						
+						mainDialog.find('.authorityEntry').click(function () {
+							$('.authorityEntry').removeClass('selectedAuthority');
+							$('.removeButton').removeClass('ui-state-disabled').removeAttr('disabled');
+							$(this).addClass('selectedAuthority');
+						})
+
 						mainDialog.dialog({
 							width: 600,
 							height: 400,
 							modal: true,
 							buttons: [
+								{
+									text: 'Remove',
+									disabled: 'disabled',
+									'class': 'ui-state-disabled removeButton',
+									click: function () {
+										var sel = $('.authorityEntry.selectedAuthority');
+										if (sel.length && confirm('Are you sure?')) {
+											var delParams = $.extend({}, params);
+											delParams.authorityID = sel.attr('data-authority');
+											delParams.authorityType = 'AccessAuthority';
+
+											$.post(service + '/removeAuthority', delParams, function (data) {
+												if (data && data.response) {
+													$(mainDialog).dialog('close');
+													loadMainDialog();
+												}
+											})
+										}
+									}
+								},
 								{
 									text: 'Add',
 									click: function () {
@@ -112,11 +140,12 @@
 								}
 							]
 						})
+
+						
+						// buttons[0].attr("disabled", true).addClass("ui-state-disabled");
 					}
 				});
 			}
-
-			
 		}
 	});
 })(jQuery);

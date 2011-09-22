@@ -18,7 +18,7 @@
 </div>
 
 <script id="PermissionTableRowTemplate" type="text/x-jquery-tmpl">
-	<tr>
+	<tr data-authority="\${ID}" class="authorityEntry">
 		<td>\${DisplayName}</td>
 		<td>\${Grant}</td>
 		<td>\${PermList}</td>
@@ -36,7 +36,7 @@
 			<label class="groupLabel">or enter group</label><input name="GroupName" />
 		</div>
 		<div>
-			<label for="grantType">For permission</label>
+			<label for="grantType">With permission</label>
 			<select name="grant">
 				<option value="GRANT" selected="selected">Grant</option>
 				<option value="DENY">Deny</option>

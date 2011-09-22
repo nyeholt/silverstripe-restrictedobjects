@@ -6,17 +6,23 @@
 #AddAuthorityDialog label {
 	font-size: 10px;
 	display: inline-block;
-	width: 100px;
+	width: 110px;
+	text-align: right;
 }
 
 #AddAuthorityDialog select, #AddAuthorityDialog input {
-	width: 100px;
+	width: 130px;
 }
 
 #AddAuthorityDialog select {
-	width: 110px;
+	width: 140px;
 }
 
 #AddAuthorityDialog div {
 	margin-bottom: 10px;
+}
+
+#PermissionManagementDialog .selectedAuthority {
+	background-color: #0000FF;
+	color: #fff;
 }
