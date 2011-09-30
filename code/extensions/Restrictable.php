@@ -78,7 +78,7 @@ class Restrictable extends DataObjectDecorator {
 	 * Allows objects that aren't in a traditional Parent/Child relationship
 	 * to indicate where their permissions are coming from
 	 *
-	 * @param DataObject $node 
+	 * @deprecated
 	 */
 	public function effectiveParent() {
 		$permParent = null;
@@ -88,6 +88,21 @@ class Restrictable extends DataObjectDecorator {
 			$permParent = $this->owner->Parent();
 		}
 		return $permParent;
+	}
+
+	/**
+	 * Return a list of all parents of this node
+	 */
+	public function effectiveParents() {
+		$permParents = new ArrayObject();
+		if ($this->owner->hasMethod('permissionSource')) {
+			$permParents[] = $this->owner->permissionSource();
+		} else if ($this->owner->hasMethod('permissionSources')) {
+			$permParents = $this->owner->permissionSources();
+		} else if ($this->owner->ParentID) {
+			$permParents[] = $this->owner->Parent();
+		}
+		return $permParents;
 	}
 
 	/**

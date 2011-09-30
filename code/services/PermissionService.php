@@ -294,8 +294,15 @@ class PermissionService {
 
 		// otherwise query our parents
 		if ($node->InheritPerms) {
-			$permParent = $node->effectiveParent();
-			return $permParent ? $this->checkPerm($permParent, $perm, $member) : false;
+			$permParents = $node->effectiveParents();
+			if (count($permParents)) {
+				foreach ($permParents as $permParent) {
+					if ($this->checkPerm($permParent, $perm, $member)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		return false;

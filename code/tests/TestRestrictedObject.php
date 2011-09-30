@@ -28,7 +28,9 @@ class TestRestrictedObject extends SapphireTest {
 	}
 	
 	public function testGrant() {
+		Restrictable::set_enabled(false);
 		$user = $this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
 		
 		$item = new PrivateObject();
 		$item->Title = 'Test item';
@@ -42,10 +44,16 @@ class TestRestrictedObject extends SapphireTest {
 	}
 	
 	public function testCheckPerm() {
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('OTHERUSER');
+		Restrictable::set_enabled(true);
+		
 		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
 		
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
 		$user = $this->cache_generatedMembers['ADMIN'];
 		
 		$item = new PrivateObject();
@@ -91,7 +99,10 @@ class TestRestrictedObject extends SapphireTest {
 	}
 	
 	function testOwnership() {
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('OTHERUSER');
+		Restrictable::set_enabled(true);
+		
 		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
 		
 		$this->logInWithPermission('NONADMIN');
@@ -103,7 +114,10 @@ class TestRestrictedObject extends SapphireTest {
 
 		$this->assertTrue($item->OwnerID == $user->ID);
 		
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('OTHERUSER');
+		Restrictable::set_enabled(true);
+		
 		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
 
 		// need to reload $item here so that ->original is stored properly
