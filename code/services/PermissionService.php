@@ -89,7 +89,7 @@ class PermissionService {
 		if (strlen($email)) {
 			$userObj = DataObject::get_one('Member', '"Email" = \''. Convert::raw2sql($email).'\'');
 		} else if (strlen($group)) {
-			$groupObj = DataObject::get_one('Organisation', '"Title" = \'' . Convert::raw2sql($group).'\'');
+			$groupObj = DataObject::get_one('Group', '"Title" = \'' . Convert::raw2sql($group).'\'');
 		}
 
 		$to = $userObj ? $userObj : $groupObj;
