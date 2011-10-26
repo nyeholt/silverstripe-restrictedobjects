@@ -192,7 +192,7 @@ class PermissionService {
 			$member = DataObject::get_by_id('Member', $member);
 		}
 
-		if (Permission::check('ADMIN')) {
+		if (Permission::check('ADMIN', 'any', $member)) {
 			return true;
 		}
 

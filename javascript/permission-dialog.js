@@ -24,20 +24,20 @@
 				$('select[name=permission]').append('<option></option>').append(options);
 			}
 		});
-		
-		$(".permission-manager").live("click", function() {
-			initialiseDialog({
-				id:   $(this).data("id"),
-				type: $(this).data("type")
-			});
-			return false;
-		});
+
+		// we search for any .permissionManager, and get the info
+		$('.permissionManager').livequery(function () {
+			var nodeInfo = $(this).data('object');
+			$(this).click (function () {
+				initialiseDialog(nodeInfo);
+			})
+		})
 		
 		function initialiseDialog(nodeInfo) {
 			var params = {
 				SecurityID: securityId, 
-				nodeID: nodeInfo.id,
-				nodeType: nodeInfo.type
+				nodeID: nodeInfo.ID, 
+				nodeType: nodeInfo.Type
 			}
 			
 			var addPermDialogOpts = {
