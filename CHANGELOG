@@ -1,3 +1,10 @@
+2011-10-27 v0.1.3
+-----------------
+
+* Added controller action to do logouts as an admin user otherwise member 
+  write is called without a context user
+* Fixed bug with a custom group type being referenced (oops!)
+
 2011-09-30 v0.1.2
 -----------------
 
