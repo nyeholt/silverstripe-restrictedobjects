@@ -212,6 +212,17 @@ class Restrictable extends DataObjectDecorator {
 			}
 		}
 	}
+	
+	/**
+	 * Set default for inherit
+	 *
+	 * @param FieldSet $fields
+	 */
+	public function updateFrontEndFields(FieldSet $fields) {
+		if (!$this->owner->ID) {
+			$fields->replaceField('InheritPerms',new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions'), true));
+		}
+	}
 
 	/**
 	 * handles SiteTree::canAddChildren, useful for other types too
@@ -252,11 +263,10 @@ class Restrictable extends DataObjectDecorator {
 				}
 
 				$fields = $this->fieldPermissions();
-				
 
 				foreach ($changed as $field => $details) {
 					if (isset($fields[$field])) {
-						// check the permission				
+						// check the permission
 						if (!$this->checkPerm($fields[$field])) {
 							// this should never happen because the field should not be visible for editing 
 							// in the first place. 
