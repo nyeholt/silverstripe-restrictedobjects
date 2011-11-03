@@ -1,3 +1,8 @@
+2011-11-04 v0.1.5
+-----------------
+ 
+* Small changes to disable perm checks before users are auto logged in
+
 2011-11-03 v0.1.4
 -----------------
 
