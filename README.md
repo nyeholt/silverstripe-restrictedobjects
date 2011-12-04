@@ -60,6 +60,9 @@ Object::add_extension('Page', 'RestrictedPage');
 * Run dev/build again, login to your system as an admin
 * On your "Site" object, make sure the "Allow public access" checkbox is
   enabled so that the site is still viewable.
+* Create the following DB index; SS doesn't give a nice way to do this 
+  and static $indexes doesn't seem to work anyway...
+  * ALTER TABLE `AccessAuthority` ADD INDEX ( `ItemID` , `ItemType` ) ;
 
 ## Typical use cases
 
