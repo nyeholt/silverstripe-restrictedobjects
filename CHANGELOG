@@ -1,3 +1,9 @@
+2012-02-22 v0.1.6
+-----------------
+
+* Better error message for write perm error
+* Info about an index that needs to be created added
+
 2011-11-04 v0.1.5
 -----------------
  

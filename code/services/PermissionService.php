@@ -295,7 +295,7 @@ class PermissionService {
 		// otherwise query our parents
 		if ($node->InheritPerms) {
 			$permParents = $node->effectiveParents();
-			if (count($permParents)) {
+			if (count($permParents) || $permParents instanceof IteratorAggregate) {
 				foreach ($permParents as $permParent) {
 					if ($this->checkPerm($permParent, $perm, $member)) {
 						return true;
@@ -416,6 +416,10 @@ class PermissionService {
 
 class PermissionDeniedException extends Exception {
 	public function __construct($permission, $message = '', $code = null, $previous = null) {
-		parent::__construct($message . ' ' . $permission, $code, $previous);
+		if ($previous) {
+			parent::__construct($message . ' ' . $permission, $code, $previous);	
+		} else {
+			parent::__construct($message . ' ' . $permission, $code);
+		}
 	}
 }

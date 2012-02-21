@@ -259,7 +259,7 @@ class Restrictable extends DataObjectDecorator {
 
 				// don't allow write
 				if (!$this->checkPerm('Write')) {
-					throw new PermissionDeniedException('Write', 'You must have write permission');
+					throw new PermissionDeniedException('Write', 'You must have write permission to ' . $this->owner->ClassName . ' #' . $this->owner->ID);
 				}
 
 				$fields = $this->fieldPermissions();
