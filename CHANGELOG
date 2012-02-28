@@ -1,3 +1,9 @@
+2012-02-28 v0.1.7
+-----------------
+
+* Forcefully remove ownerID from list of changed fields so that an owner is
+  always set
+
 2012-02-22 v0.1.6
 -----------------
 

@@ -255,6 +255,8 @@ class Restrictable extends DataObjectDecorator {
 				// set the owner now so that our perm check in a second works.
 				if (!$this->owner->OwnerID && singleton('SecurityContext')->getMember()) {
 					$this->owner->OwnerID = singleton('SecurityContext')->getMember()->ID;
+					// ignore any changed fields setting for this field
+					unset($changed['OwnerID']);
 				}
 
 				// don't allow write
@@ -270,7 +272,7 @@ class Restrictable extends DataObjectDecorator {
 						if (!$this->checkPerm($fields[$field])) {
 							// this should never happen because the field should not be visible for editing 
 							// in the first place. 
-							throw new PermissionDeniedException('Write', "Invalid permissions to edit $field, " . $fields[$field] . " required");
+							throw new PermissionDeniedException($fields[$field], "Invalid permissions to edit $field, " . $fields[$field] . " required");
 						}
 					}
 				}
