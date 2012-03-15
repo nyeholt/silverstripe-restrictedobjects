@@ -380,7 +380,7 @@ class PermissionService {
 					$auth = $authority->getAuthority();
 					if ($auth) {
 						$authority->DisplayName = $auth->getTitle();
-						$authority->PermList = implode(',', $authority->Perms->getValues());
+						$authority->PermList = implode(', ', $authority->Perms->getValues());
 					} else {
 						$authority->DisplayName = 'INVALID AUTHORITY: #' . $authority->ID;
 					}

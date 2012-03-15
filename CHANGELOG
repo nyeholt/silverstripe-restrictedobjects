@@ -1,3 +1,9 @@
+
+2012-03-15 v0.1.8
+-----------------
+
+* Make sure ownerID field only lists members we have access to
+
 2012-02-28 v0.1.7
 -----------------
 

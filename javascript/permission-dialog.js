@@ -26,13 +26,11 @@
 		});
 
 		// we search for any .permissionManager, and get the info
-		$('.permissionManager').livequery(function () {
-			var nodeInfo = $(this).data('object');
-			$(this).click (function () {
-				initialiseDialog(nodeInfo);
-			})
-		})
-		
+		$(".permissionManager").live("click", function() {
+			initialiseDialog($(this).data("object"));
+			return false;
+		});
+
 		function initialiseDialog(nodeInfo) {
 			var params = {
 				SecurityID: securityId, 
@@ -68,7 +66,6 @@
 									if (data.response.status === false && data.response.message) {
 										alert(data.response.message);
 									} else {
-										console.log(data.response);
 										$(addPermDialog).dialog('close');
 										loadMainDialog();
 									}
@@ -88,7 +85,6 @@
 			loadMainDialog();
 			
 			function loadMainDialog() {
-				
 				$.get(service + '/getPermissionsFor', params, function (data) {
 					if (data && data.response) {
 						mainDialog.find('table.currentAuthorities tbody').empty();

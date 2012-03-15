@@ -32,8 +32,8 @@
 			<label for="permission">or permission</label><select name="permission"></select>
 		</div>
 		<div>
-			<label class="userLabel">User email address</label><input name="MemberName" /> 
-			<label class="groupLabel">or enter group</label><input name="GroupName" />
+			<label class="userLabel">User email address</label><input name="MemberName" type="text" /> 
+			<label class="groupLabel">or enter group</label><input name="GroupName" type="text" />
 		</div>
 		<div>
 			<label for="grantType">With permission</label>
