@@ -48,7 +48,7 @@ class PermissionService {
 	public function getAllRoles() {
 		return DataObject::get('AccessRole');
 	}
-	
+
 	public function getPermissionDetails() {
 		return array(
 			'roles'				=> $this->getAllRoles(),
@@ -363,7 +363,7 @@ class PermissionService {
 			return true;
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param DataObject $node

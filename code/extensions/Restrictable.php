@@ -223,12 +223,15 @@ class Restrictable extends DataObjectDecorator {
 			$fields->replaceField('InheritPerms',new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions'), true));
 		}
 		
-		$members = singleton('DataService')->getAllMember();
-		$source = array();
-		if ($members) {
-			$source = $members->map();
+		$ownerField = $fields->fieldByName('OwnerID');
+		if ($ownerField) {
+			$members = singleton('DataService')->getAllMember();
+			$source = array();
+			if ($members) {
+				$source = $members->map();
+			}
+			$ownerField->setSource($source);
 		}
-		$fields->fieldByName('OwnerID')->setSource($source);
 	}
 
 	/**
