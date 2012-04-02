@@ -152,7 +152,11 @@ class DataService {
 			}
 			if(class_exists($record['RecordClassName'])) {
 				$item = new $record['RecordClassName']($record);
-				if ($item->checkPerm('View')) {
+				if ($item->hasMethod('checkPerm')) {
+					if ($item->checkPerm('View')) {
+						$results[] = $item;
+					}
+				} else if ($item->canView()) {
 					$results[] = $item;
 				}
 			} else {
@@ -165,7 +169,11 @@ class DataService {
 				}
 				
 				$item = new $baseClass($record);
-				if ($item->checkPerm('View')) {
+				if ($item->hasMethod('checkPerm')) {
+					if ($item->checkPerm('View')) {
+						$results[] = $item;
+					}
+				} else if ($item->canView()) {
 					$results[] = $item;
 				}
 			}
