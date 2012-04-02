@@ -18,14 +18,14 @@ class SecurityContext {
 	public function getMember() {
 		if (!$this->currentMember) {
 			// need to allow member to write itself before it's fully loaded...
-			Restrictable::set_enabled(false);
+			$curr = Restrictable::set_enabled(false);
 			if (Member::currentUserID()) {
 				$this->currentMember = Member::currentUser();
 			} else {
 				// ignore this for now!
 //				$this->currentMember = singleton('PublicMember');
 			}
-			Restrictable::set_enabled(true);
+			Restrictable::set_enabled($curr);
 		}
 		return $this->currentMember;
 	}

@@ -1,3 +1,8 @@
+2012-04-02 v0.1.9
+-----------------
+
+* Fixed issue where restrictable was always being enabled by SecurityContext
+  when it should be resetting to previous value
 
 2012-03-15 v0.1.8
 -----------------

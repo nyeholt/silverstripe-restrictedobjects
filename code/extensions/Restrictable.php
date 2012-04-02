@@ -14,7 +14,9 @@ class Restrictable extends DataObjectDecorator {
 	protected static $enabled = true;
 
 	public static function set_enabled($v = true) {
+		$prev = self::$enabled;
 		self::$enabled = $v;
+		return $prev;
 	}
 
 	public function extraStatics() {
