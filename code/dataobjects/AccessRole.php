@@ -20,29 +20,28 @@ class AccessRole extends DataObject {
 				return;
 			}
 			
-			$dp = new DefaultPermissions();
-			$dp = $dp->definePermissions();
+			$dp = self::allPermissions();
 
 			$role = new AccessRole;
 			$role->Title = 'Admin';
-			$role->Composes = $dp;
+			$role->Composes = array_values($dp);
 			$role->write();
 			
 			$ownerPerms = $dp;
 			// get rid of publish from owners
-			unset($ownerPerms[4]);
+			unset($ownerPerms['Publish']);
 			
 			$role = new AccessRole;
 			$role->Title = 'Owner';
-			$role->Composes = $ownerPerms;
+			$role->Composes = array_keys($ownerPerms);
 			$role->write();
 
-			unset($dp[count($dp) - 1]);
-			unset($dp[count($dp) - 1]);
+			unset($dp['TakeOwnership']);
+			unset($dp['Configure']);
 
 			$role = new AccessRole;
 			$role->Title = 'Manager';
-			$role->Composes = $dp;
+			$role->Composes = array_keys($dp);
 			$role->write();
 
 			$role = new AccessRole;
