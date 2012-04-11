@@ -13,6 +13,10 @@ class Restrictable extends DataObjectDecorator {
 	 */
 	protected static $enabled = true;
 
+	public static function get_enabled() {
+		return self::$enabled;
+	}
+	
 	public static function set_enabled($v = true) {
 		$prev = self::$enabled;
 		self::$enabled = $v;
@@ -137,8 +141,13 @@ class Restrictable extends DataObjectDecorator {
 		return $fieldPerms;
 	}
 
+	/**
+	 * Check for a View permission only if the item exists in the DB
+	 * @param type $member
+	 * @return type 
+	 */
 	public function canView($member=null) {
-		if (self::$enabled) {
+		if (self::$enabled && $this->owner->exists()) {
 			$res = $this->checkPerm('View', $member);
 			return $res;
 		}
