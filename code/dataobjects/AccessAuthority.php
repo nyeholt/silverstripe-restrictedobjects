@@ -11,6 +11,7 @@ class AccessAuthority extends DataObject {
 	public static $db = array(
 		'Type'				=> "Enum('Member,Group')",
 		'AuthorityID'		=> 'Int',
+		'Role'				=> 'Varchar',			// recorded so future role changes can propagate
 		'Perms'				=> 'MultiValueField',
 		'Grant'				=> "Enum('GRANT,DENY','GRANT')",
 		'ItemID'			=> 'Int',

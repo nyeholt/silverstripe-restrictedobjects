@@ -154,6 +154,7 @@ class PermissionService {
 			$existing->ItemID = $node->ID;
 			$existing->ItemType = $node->class;
 			$existing->Grant = $grant;
+			$existing->Role = $role ? $role->Title : '';
 		}
 
 		$currentRoles = $existing->Perms->getValues();
@@ -171,7 +172,7 @@ class PermissionService {
 			$key = $this->permCacheKey($node, $perm);
 			$this->getCache()->remove($key);
 		}
-		
+
 		return $existing;
 	}
 	
