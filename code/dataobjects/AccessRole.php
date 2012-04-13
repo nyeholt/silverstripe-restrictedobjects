@@ -72,28 +72,30 @@ class AccessRole extends DataObject {
 			$removed = array_diff($original, $after);
 			$appliedTo = DataObject::get('AccessAuthority', '"Role" = \'' . Convert::raw2sql($this->Title).'\'');
 			
-			foreach ($appliedTo as $applied) {
-				$perms = $applied->Perms->getValues();
-				$clear = array();
-				foreach ($added as $toAdd) {
-					$perms[] = $toAdd;
-					$clear[] = $toAdd;
-					
-				}
-				foreach ($removed as $toRemove) {
-					$index = array_search($toRemove, $perms);
-					if ($index !== false) {
-						$clear[] = $toRemove;
-						unset($perms[$index]);
+			if ($appliedTo) {
+				foreach ($appliedTo as $applied) {
+					$perms = $applied->Perms->getValues();
+					$clear = array();
+					foreach ($added as $toAdd) {
+						$perms[] = $toAdd;
+						$clear[] = $toAdd;
+
 					}
-				}
-				
-				if (count($clear)) {
-					$applied->Perms = $perms;
-					$applied->write();
-					
-					foreach ($clear as $permToClear) {
-						singleton('PermissionService')->clearPermCacheFor($applied->getItem(), $permToClear);
+					foreach ($removed as $toRemove) {
+						$index = array_search($toRemove, $perms);
+						if ($index !== false) {
+							$clear[] = $toRemove;
+							unset($perms[$index]);
+						}
+					}
+
+					if (count($clear)) {
+						$applied->Perms = $perms;
+						$applied->write();
+
+						foreach ($clear as $permToClear) {
+							singleton('PermissionService')->clearPermCacheFor($applied->getItem(), $permToClear);
+						}
 					}
 				}
 			}

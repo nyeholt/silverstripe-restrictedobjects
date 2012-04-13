@@ -177,6 +177,56 @@ class PermissionService {
 	}
 	
 	/**
+	 * Removes a set of permissions applied on an object to a particular user/group
+	 *
+	 * @param DataObject $node
+	 * @param type $perm
+	 * @param DataObject $to
+	 * @param type $grant 
+	 */
+	public function removePermissions(DataObject $node, $perm, DataObject $userOrGroup, $grant = 'GRANT') {
+		if (!$this->checkPerm($node, 'ChangePermissions')) {
+			throw new PermissionDeniedException("You do not have permission to do that");
+		}
+
+		$composedOf = $perm;
+		if (!is_array($perm)) {
+			$role = DataObject::get_one('AccessRole', '"Title" = \'' . Convert::raw2sql($perm) . '\'');
+			$composedOf = array($perm);
+			if ($role && $role->exists()) {
+				$composedOf = $role->Composes->getValues();
+			}
+		}
+		
+		$type = $userOrGroup instanceof Member ? 'Member' : 'Group';
+		$filter = array(
+			'Type =' => $type,
+			'AuthorityID =' => $userOrGroup->ID,
+			'ItemID =' => $node->ID,
+			'ItemType =' => $node->class,
+			'Grant =' => $grant,
+		);
+
+		$existing = DataObject::get_one('AccessAuthority', singleton('SiteUtils')->dbQuote($filter));
+
+		if (!$existing || !$existing->exists()) {
+			return;
+		}
+
+		$current = $existing->Perms->getValues();
+		if (is_array($current) && count($current)) {
+			$new = array_diff($current, $composedOf);
+			$existing->Perms = $new;
+			$existing->write();
+			
+			foreach ($composedOf as $remove) {
+				$key = $this->permCacheKey($node, $remove);
+				$this->getCache()->remove($key);
+			}
+		}
+	}
+	
+	/**
 	 * Return true or false as to whether a given user can access an object
 	 * 
 	 * @param type $perm

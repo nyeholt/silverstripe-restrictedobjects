@@ -96,6 +96,10 @@ class TestRestrictedObject extends SapphireTest {
 		
 		// but can still edit at that level
 		$this->assertTrue($otherItem->checkPerm('Publish'));
+		
+		// now try just deleting the permission
+		singleton('PermissionService')->removePermissions($item, 'Publish', Member::currentUser());
+		$this->assertFalse($item->checkPerm('Publish'));
 	}
 	
 	function testOwnership() {

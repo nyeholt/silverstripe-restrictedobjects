@@ -17,7 +17,10 @@ class TestTransactionManager extends SapphireTest {
 	}
 
 	public function testRunAs() {
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('FIRST');
+		Restrictable::set_enabled(true);
+		
 		$first = $this->cache_generatedMembers['FIRST'];
 		
 		// cerate an object, it should be by the second user
