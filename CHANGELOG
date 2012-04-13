@@ -1,9 +1,16 @@
+2012-04-13 v0.2.1
+-----------------
+
+* FEATURE Use the tracked role to update any applied permissions when the
+  permission set changes
+
 2012-04-11 v0.2.0
 -----------------
 
 * Change the way default permissions are put together
 * BUGFIX: Only check permission if the object actually exists
-* FEATURE: Track the role that was used when applying apermission so that it can be updated later if the role changes
+* FEATURE: Track the role that was used when applying apermission so that it 
+  can be updated later if the role changes
 
 
 2012-04-02 v0.1.9

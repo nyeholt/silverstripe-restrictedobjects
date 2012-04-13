@@ -62,6 +62,42 @@ class AccessRole extends DataObject {
 			// a hack, but necessary for the moment...
 			singleton('PermissionService')->getCache()->remove('ownerperms');
 		}
+		
+		$changed = $this->getChangedFields(false, 2);
+		
+		if (isset($changed['Composes'])) {
+			$original = isset($this->original['ComposesValue']) ? unserialize($this->original['ComposesValue']) : array();
+			$after = $changed['Composes']['after'];
+			$added = array_diff($after, $original);
+			$removed = array_diff($original, $after);
+			$appliedTo = DataObject::get('AccessAuthority', '"Role" = \'' . Convert::raw2sql($this->Title).'\'');
+			
+			foreach ($appliedTo as $applied) {
+				$perms = $applied->Perms->getValues();
+				$clear = array();
+				foreach ($added as $toAdd) {
+					$perms[] = $toAdd;
+					$clear[] = $toAdd;
+					
+				}
+				foreach ($removed as $toRemove) {
+					$index = array_search($toRemove, $perms);
+					if ($index !== false) {
+						$clear[] = $toRemove;
+						unset($perms[$index]);
+					}
+				}
+				
+				if (count($clear)) {
+					$applied->Perms = $perms;
+					$applied->write();
+					
+					foreach ($clear as $permToClear) {
+						singleton('PermissionService')->clearPermCacheFor($applied->getItem(), $permToClear);
+					}
+				}
+			}
+		}
 	}
 	
 	public static function allPermissions() {
