@@ -307,8 +307,10 @@ class PermissionService {
 				foreach ($existing as $access) {
 					// check if this mentions the perm in question
 					$perms = $access->Perms->getValues();
-					if (!in_array($perm, $perms)) {
-						continue;
+					if($perms){
+						if (!in_array($perm, $perms)) {
+							continue;
+						}	
 					}
 
 					$grant = null;

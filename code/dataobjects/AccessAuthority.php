@@ -43,7 +43,9 @@ class AccessAuthority extends DataObject {
 	}
 	
 	public function PermList() {
-		return '<p>'.implode('</p><p>', $this->Perms->getValues()).'</p>';
+		if($this->Perms->getValues()){
+			return '<p>'.implode('</p><p>', $this->Perms->getValues()).'</p>';	
+		}
 	}
 	
 	public function onAfterDelete() {
