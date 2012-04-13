@@ -218,14 +218,20 @@ class PermissionService {
 			$new = array_diff($current, $composedOf);
 			$existing->Perms = $new;
 			$existing->write();
-			
 			foreach ($composedOf as $remove) {
 				$key = $this->permCacheKey($node, $remove);
 				$this->getCache()->remove($key);
 			}
+			if (!count($new)) {
+				try {
+					$this->removeAuthority($node, $existing);
+				} catch (Exception $e) {
+					// oh well
+				}
+			}
 		}
 	}
-	
+
 	/**
 	 * Return true or false as to whether a given user can access an object
 	 * 
