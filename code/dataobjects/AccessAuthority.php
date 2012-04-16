@@ -51,9 +51,10 @@ class AccessAuthority extends DataObject {
 	public function onAfterDelete() {
 		parent::onBeforeDelete();
 		
-		$values = $this->Perms->getValues();
-		foreach ($values as $perm) {
-			singleton('PermissionService')->clearPermCacheFor($this->getItem(), $perm);
+		if($values = $this->Perms->getValues()){
+			foreach ($values as $perm) {
+				singleton('PermissionService')->clearPermCacheFor($this->getItem(), $perm);
+			}
 		}
 	}
 }
