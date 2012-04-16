@@ -71,7 +71,7 @@ class AccessRole extends DataObject {
 			$added = array_diff($after, $original);
 			$removed = array_diff($original, $after);
 			$appliedTo = DataObject::get('AccessAuthority', '"Role" = \'' . Convert::raw2sql($this->Title).'\'');
-			
+
 			if ($appliedTo) {
 				foreach ($appliedTo as $applied) {
 					$perms = $applied->Perms->getValues();

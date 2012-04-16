@@ -455,6 +455,9 @@ class PermissionService {
 	 * @param type $perm 
 	 */
 	public function clearPermCacheFor(DataObject $item, $perm) {
+		if (!$item) {
+			return;
+		}
 		$key = $this->permCacheKey($item, $perm);
 		// clear caching
 		$this->getCache()->remove($key);
