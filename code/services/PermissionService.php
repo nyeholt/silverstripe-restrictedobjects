@@ -457,9 +457,10 @@ class PermissionService {
 	 * @param type $perm 
 	 */
 	public function clearPermCacheFor(DataObject $item, $perm) {
-		$key = $this->permCacheKey($item, $perm);
-		// clear caching
-		$this->getCache()->remove($key);
+		if($key = $this->permCacheKey($item, $perm)){
+			// clear caching
+			$this->getCache()->remove($key);
+		}
 	}
 	
 	/**
@@ -469,7 +470,9 @@ class PermissionService {
 	 * @return string
 	 */
 	public function permCacheKey(DataObject $node, $perm) {
-		return md5($perm . '-' . $node->ID . '-' . $node->class);
+		if($perm && $node){
+			return md5($perm . '-' . $node->ID . '-' . $node->class);
+		}
 	}
 }
 
