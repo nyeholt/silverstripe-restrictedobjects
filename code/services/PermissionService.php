@@ -177,6 +177,33 @@ class PermissionService {
 	}
 	
 	/**
+	 * Check for the presence of ALL permissions in a given role for the user to an object
+	 *
+	 * @param DataObject $node
+	 *			The object to check perms on
+	 * @param string $role
+	 *			The role to check against
+	 * @param Member $member 
+	 *			The member to check -if not set, the current user is used
+	 */
+	public function checkRole(DataObject $node, $role, $member = null) {
+		$role = DataObject::get_one('AccessRole', '"Title" = \'' . Convert::raw2sql($role) . '\'');
+
+		if ($role && $role->exists()) {
+			$composedOf = $role->Composes->getValues();
+			if ($composedOf && is_array($composedOf)) {
+				foreach ($composedOf as $perm) {
+					if (!$this->checkPerm($node, $perm, $member)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Removes a set of permissions applied on an object to a particular user/group
 	 *
 	 * @param DataObject $node
@@ -235,9 +262,13 @@ class PermissionService {
 	/**
 	 * Return true or false as to whether a given user can access an object
 	 * 
-	 * @param type $perm
-	 * @param type $member
-	 * @param type $alsoFor
+	 * @param DataObject $node
+	 *			The object to check perms on
+	 * @param string $perm
+	 *			The permission to check against
+	 * @param Member $member 
+	 *			The member to check - if not set, the current user is used
+	 * 
 	 * @return type 
 	 */
 	public function checkPerm(DataObject $node, $perm, $member=null) {
