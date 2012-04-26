@@ -338,8 +338,10 @@ class PermissionService {
 				foreach ($existing as $access) {
 					// check if this mentions the perm in question
 					$perms = $access->Perms->getValues();
-					if (!in_array($perm, $perms)) {
-						continue;
+					if($perms){
+						if (!in_array($perm, $perms)) {
+							continue;
+						}	
 					}
 
 					$grant = null;
@@ -489,9 +491,10 @@ class PermissionService {
 		if (!$item) {
 			return;
 		}
-		$key = $this->permCacheKey($item, $perm);
-		// clear caching
-		$this->getCache()->remove($key);
+		if($key = $this->permCacheKey($item, $perm)){
+			// clear caching
+			$this->getCache()->remove($key);
+		}
 	}
 	
 	/**
@@ -501,7 +504,9 @@ class PermissionService {
 	 * @return string
 	 */
 	public function permCacheKey(DataObject $node, $perm) {
-		return md5($perm . '-' . $node->ID . '-' . $node->class);
+		if($perm && $node){
+			return md5($perm . '-' . $node->ID . '-' . $node->class);
+		}
 	}
 }
 
