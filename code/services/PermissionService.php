@@ -409,9 +409,11 @@ class PermissionService {
 				return true;
 			}
 
-			$parent = $node->effectiveParent();
-			if ($parent) {
-				return $this->checkPublicPerms($parent, $perm);
+			if($node->InheritPerms){
+				$parent = $node->effectiveParent();
+				if ($parent) {
+					return $this->checkPublicPerms($parent, $perm);
+				}	
 			}
 		}
 		return false;
