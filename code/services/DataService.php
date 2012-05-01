@@ -62,8 +62,8 @@ class DataService {
 	 * @param type $containerClass
 	 * @return DataObjectSet
 	 */
-	public function getAll($callerClass, $filter = "", $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet") {
-		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $containerClass);
+	public function getAll($callerClass, $filter = "", $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet", $requiredPerm = 'View') {
+		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $containerClass, $requiredPerm);
 	}
 
 	/**
