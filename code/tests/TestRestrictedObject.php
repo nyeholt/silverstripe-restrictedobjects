@@ -70,6 +70,9 @@ class TestRestrictedObject extends SapphireTest {
 		$can = $item->checkPerm('View');
 		$this->assertTrue($can);
 		
+		$can = singleton('PermissionService')->checkRole($item, 'Manager');
+		$this->assertTrue($can);
+		
 		// try inherited items
 		$otherItem = new PrivateObject();
 		$otherItem->Title = 'Private child object';

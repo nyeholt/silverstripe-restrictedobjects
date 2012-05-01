@@ -65,7 +65,7 @@ class DataService {
 	public function getAll($callerClass, $filter = "", $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet") {
 		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $containerClass);
 	}
-	
+
 	/**
 	 * Gets a single object
 	 *
@@ -75,16 +75,20 @@ class DataService {
 	 * @param type $orderby
 	 * @return DataObject
 	 */
-	public function getOne($callerClass, $filter = "", $cache = true, $orderby = "") {
+	public function getOne($callerClass, $filter = "", $cache = true, $orderby = "", $requiredPerm = 'View') {
 		if (is_array($filter)) {
 			$filter = $this->dbQuote($filter);
 		}
 		$item = DataObject::get_one($callerClass, $filter, $cache, $orderby);
-		if ($item && $item->checkPerm('View')) {
+		if ($item && $item->hasExtension('Restrictable') && $item->checkPerm($requiredPerm)) {
+			return $item;
+		}
+
+		if ($item && $item->canView()) {
 			return $item;
 		}
 	}
-	
+
 	/**
 	 * Return the given element, searching by ID
 	 *
@@ -94,10 +98,10 @@ class DataService {
 	 *
 	 * @return DataObject The element
 	 */
-	public function byId($callerClass, $id, $cache = true) {
+	public function byId($callerClass, $id, $cache = true, $requiredPerm = 'View') {
 		$id = (int) $id;
 		$item = DataObject::get_by_id($callerClass, $id, $cache);
-		if ($item && $item->hasExtension('Restrictable') && $item->checkPerm('View')) {
+		if ($item && $item->hasExtension('Restrictable') && $item->checkPerm($requiredPerm)) {
 			return $item;
 		}
 		
@@ -117,7 +121,7 @@ class DataService {
 	 *
 	 * @return mixed The objects matching the filter, in the class specified by $containerClass
 	 */
-	public function loadObjects($type, $filter = "", $sort = "", $join = "", $limit="", $containerClass = "DataObjectSet") {
+	public function loadObjects($type, $filter = "", $sort = "", $join = "", $limit="", $containerClass = "DataObjectSet", $requiredPerm = 'View') {
 		if(!DB::isActive()) {
 			throw new Exception("DataObjects have been requested before the database is ready. Please ensure your database connection details are correct, your database has been built, and that you are not trying to query the database in _config.php.");
 		}
@@ -130,7 +134,7 @@ class DataService {
 		
 		$records = $query->execute();
 		
-		$ret = $this->buildDataObjectSet($records, $containerClass, $query, $dummy->class);
+		$ret = $this->buildDataObjectSet($records, $containerClass, $query, $dummy->class, $requiredPerm);
 		if($ret) $ret->parseQueryLimit($query);
 		return $ret;
 	}
@@ -145,7 +149,7 @@ class DataService {
 	 *
 	 * @return mixed The new objects in an object of type $containerClass
 	 */
-	function buildDataObjectSet($records, $containerClass = "DataObjectSet", $query = null, $baseClass = null) {
+	function buildDataObjectSet($records, $containerClass = "DataObjectSet", $query = null, $baseClass = null, $requiredPerm = 'View') {
 		foreach($records as $record) {
 			if(empty($record['RecordClassName'])) {
 				$record['RecordClassName'] = $record['ClassName'];
@@ -153,7 +157,7 @@ class DataService {
 			if(class_exists($record['RecordClassName'])) {
 				$item = new $record['RecordClassName']($record);
 				if ($item->hasMethod('checkPerm')) {
-					if ($item->checkPerm('View')) {
+					if ($item->checkPerm($requiredPerm)) {
 						$results[] = $item;
 					}
 				} else if ($item->canView()) {
@@ -170,7 +174,7 @@ class DataService {
 				
 				$item = new $baseClass($record);
 				if ($item->hasMethod('checkPerm')) {
-					if ($item->checkPerm('View')) {
+					if ($item->checkPerm($requiredPerm)) {
 						$results[] = $item;
 					}
 				} else if ($item->canView()) {
