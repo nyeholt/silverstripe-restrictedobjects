@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Description of PermissionTableField
- *
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
@@ -18,7 +16,13 @@ class PermissionTableField extends ComplexTableField {
 			$members = new CheckboxSetField('Members', _t('AccessAuthority.MEMBERS', 'Members'), DataObject::get('Member'));
 			$groups = new CheckboxSetField('Groups', _t('AccessAuthority.GROUPS', 'Groups'), DataObject::get('Group'));
 
-			$roles = new DropdownField('Role', _t('AccessAuthority.ROLE', 'Role'), DataObject::get('AccessRole')->map('Title', 'Title'), '', null, '(Role)');
+			$allRoles = DataObject::get('AccessRole');
+			if ($allRoles) {
+				$allRoles = $allRoles->map('Title', 'Title');
+			} else {
+				$allRoles = array();
+			}
+			$roles = new DropdownField('Role', _t('AccessAuthority.ROLE', 'Role'), $allRoles, '', null, '(Role)');
 
 			// deliberately only allow singles here - people should define roles!
 			$perms = new DropdownField('Perms', _t('PermissionTable.PERMS', 'Permission - use roles for multiple!'), AccessRole::allPermissions(), '', null, '(Permission)');
