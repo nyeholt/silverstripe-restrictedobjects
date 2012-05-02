@@ -114,7 +114,10 @@ class PermissionService {
 			throw new PermissionDeniedException("You do not have permission to do that");
 		}
 
-		$authority->delete();
+		if ($authority) {
+			$authority->delete();
+		}
+		
 		return $node;
 	}
 	

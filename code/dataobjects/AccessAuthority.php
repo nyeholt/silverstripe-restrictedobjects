@@ -57,4 +57,8 @@ class AccessAuthority extends DataObject {
 			}
 		}
 	}
+	
+	public function canView() {
+		return Member::currentUserID() > 0;
+	}
 }
