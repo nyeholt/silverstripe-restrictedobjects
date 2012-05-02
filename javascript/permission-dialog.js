@@ -12,7 +12,6 @@
 		var params = {
 			SecurityID: securityId
 		};
-		
 
 		$.get(service + '/getPermissionDetails', params, function (data) {
 			// populate stuff!
@@ -60,6 +59,7 @@
 							grantParams.perm = role ? role : perm;
 							grantParams.email = addPermDialog.find('input[name=MemberName]').val();
 							grantParams.group = addPermDialog.find('input[name=GroupName]').val();
+							grantParams.grant = addPermDialog.find('select[name=grant]').val();
 
 							$.post(service + '/grantTo', grantParams, function (data) {
 								if (data && data.response) {
