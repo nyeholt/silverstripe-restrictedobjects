@@ -62,8 +62,8 @@ class DataService {
 	 * @param type $containerClass
 	 * @return DataObjectSet
 	 */
-	public function getAll($callerClass, $filter = null, $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet", $requiredPerm = 'View') {
-		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $containerClass, $requiredPerm);
+	public function getAll($callerClass, $filter = null, $sort = "", $join = "", $limit = "", $requiredPerm = 'View') {
+		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $requiredPerm);
 	}
 
 	/**
@@ -76,16 +76,9 @@ class DataService {
 	 * @return DataObject
 	 */
 	public function getOne($callerClass, $filter = "", $cache = true, $orderby = "", $requiredPerm = 'View') {
-		if (is_array($filter)) {
-			$filter = $this->dbQuote($filter);
-		}
-		$item = DataObject::get_one($callerClass, $filter, $cache, $orderby);
-		if ($item && $item->hasExtension('Restrictable') && $item->checkPerm($requiredPerm)) {
-			return $item;
-		}
-
-		if ($item && $item->canView()) {
-			return $item;
+		$items = $this->getAll($callerClass, $filter, $orderby, null, null, $requiredPerm);
+		if ($items && count($items)) {
+			return $items[0];
 		}
 	}
 
@@ -117,16 +110,15 @@ class DataService {
 	 * @param string $sort A sort expression to be inserted into the ORDER BY clause.  If omitted, self::$default_sort will be used.
 	 * @param string $join A single join clause.  This can be used for filtering, only 1 instance of each DataObject will be returned.
 	 * @param string $limit A limit expression to be inserted into the LIMIT clause.
-	 * @param string $containerClass The container class to return the results in.
 	 *
 	 * @return mixed The objects matching the filter, in the class specified by $containerClass
 	 */
-	public function loadObjects($type, $filter = "", $sort = "", $join = "", $limit="", $containerClass = "DataObjectSet", $requiredPerm = 'View') {
+	public function loadObjects($type, $filter = "", $sort = "", $join = "", $limit="", $requiredPerm = 'View') {
 		if(!DB::isActive()) {
 			throw new Exception("DataObjects have been requested before the database is ready. Please ensure your database connection details are correct, your database has been built, and that you are not trying to query the database in _config.php.");
 		}
 
-		$list = DataList::create($type); 
+		$list = RestrictedDataList::create($type, $requiredPerm); 
 		if ($filter) {
 			$list->filter($filter);
 		}
@@ -143,12 +135,14 @@ class DataService {
 			$list->innerJoin($join);
 		}
 		
-		$query = $list->dataQuery(); // $dummy->extendedSQL($filter, $sort, $limit, $join);
+//		$query = $list->dataQuery(); // $dummy->extendedSQL($filter, $sort, $limit, $join);
+//		
+//		$records = $query->execute();
+//		
+//		$ret = $this->buildDataObjectSet($records, $containerClass, $query, $dummy->class, $requiredPerm);
+//		if($ret) $ret->parseQueryLimit($query);
+		$ret = new ArrayList($list->toArray());
 		
-		$records = $query->execute();
-		
-		$ret = $this->buildDataObjectSet($records, $containerClass, $query, $dummy->class, $requiredPerm);
-		if($ret) $ret->parseQueryLimit($query);
 		return $ret;
 	}
 	
