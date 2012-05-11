@@ -6,7 +6,7 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class RestrictedMember extends DataObjectDecorator {
+class RestrictedMember extends DataExtension {
 	
 	public function memberAutoLoggedIn() {
 		$this->memberLoggedIn();

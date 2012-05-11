@@ -62,7 +62,7 @@ class DataService {
 	 * @param type $containerClass
 	 * @return DataObjectSet
 	 */
-	public function getAll($callerClass, $filter = "", $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet", $requiredPerm = 'View') {
+	public function getAll($callerClass, $filter = null, $sort = "", $join = "", $limit = "", $containerClass = "DataObjectSet", $requiredPerm = 'View') {
 		return $this->loadObjects($callerClass, $filter, $sort, $join, $limit, $containerClass, $requiredPerm);
 	}
 
@@ -125,12 +125,25 @@ class DataService {
 		if(!DB::isActive()) {
 			throw new Exception("DataObjects have been requested before the database is ready. Please ensure your database connection details are correct, your database has been built, and that you are not trying to query the database in _config.php.");
 		}
-		if (is_array($filter)) {
-			$filter = $this->dbQuote($filter);
-		}
-		$dummy = singleton($type);
 
-		$query = $dummy->extendedSQL($filter, $sort, $limit, $join);
+		$list = DataList::create($type); 
+		if ($filter) {
+			$list->filter($filter);
+		}
+		if ($sort) {
+			$list->sort($sort);
+		}
+		if ($limit) {
+			if (is_string($limit)) {
+				$limit = explode(',', $limit);
+			}
+			$list->limit($limit[0], $limit[1]);
+		}
+		if ($join) {
+			$list->innerJoin($join);
+		}
+		
+		$query = $list->dataQuery(); // $dummy->extendedSQL($filter, $sort, $limit, $join);
 		
 		$records = $query->execute();
 		

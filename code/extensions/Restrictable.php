@@ -6,12 +6,25 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class Restrictable extends DataObjectDecorator {
+class Restrictable extends DataExtension {
 
 	/**
 	 * @var boolean
 	 */
 	protected static $enabled = true;
+	
+	public static $db = array(
+		'InheritPerms' => 'Boolean',
+		'PublicAccess' => 'Boolean',
+	);
+	
+	public static $has_one = array(
+		'Owner' => 'Member',
+	);
+	
+	public static $defaults = array(
+		'InheritPerms' => true,
+	);
 
 	public static function get_enabled() {
 		return self::$enabled;
@@ -21,21 +34,6 @@ class Restrictable extends DataObjectDecorator {
 		$prev = self::$enabled;
 		self::$enabled = $v;
 		return $prev;
-	}
-
-	public function extraStatics() {
-		return array(
-			'db' => array(
-				'InheritPerms' => 'Boolean',
-				'PublicAccess' => 'Boolean',
-			),
-			'has_one' => array(
-				'Owner' => 'Member',
-			),
-			'defaults' => array(
-				'InheritPerms' => true,
-			),
-		);
 	}
 
 	public function getAuthorities() {

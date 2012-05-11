@@ -27,7 +27,7 @@ class PermissionTableField extends ComplexTableField {
 			// deliberately only allow singles here - people should define roles!
 			$perms = new DropdownField('Perms', _t('PermissionTable.PERMS', 'Permission - use roles for multiple!'), AccessRole::allPermissions(), '', null, '(Permission)');
 			
-			$detailFormFields = new FieldSet(
+			$detailFormFields = new FieldList(
 				$roles,
 				$perms,
 				$members,
