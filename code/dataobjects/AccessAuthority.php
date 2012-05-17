@@ -27,6 +27,7 @@ class AccessAuthority extends DataObject {
 //	public static $indexes = array(
 //		'ItemID', 'ItemType',
 //	);
+	
 
 	public function getAuthority() {
 		if ($this->Type && $this->AuthorityID > 0) {
@@ -60,5 +61,46 @@ class AccessAuthority extends DataObject {
 	
 	public function canView() {
 		return Member::currentUserID() > 0;
+	}
+	
+	public function getCMSFields() {
+		$fields = FieldList::create();
+		
+		$dummy = singleton('AccessAuthority');
+
+		$members = new CheckboxSetField('Members', _t('AccessAuthority.MEMBERS', 'Members'), DataObject::get('Member'));
+		$groups = new CheckboxSetField('Groups', _t('AccessAuthority.GROUPS', 'Groups'), DataObject::get('Group'));
+
+		$allRoles = DataObject::get('AccessRole');
+		if ($allRoles) {
+			$allRoles = $allRoles->map('Title', 'Title');
+		} else {
+			$allRoles = array();
+		}
+		$roles = new DropdownField('Role', _t('AccessAuthority.ROLE', 'Role'), $allRoles, '', null, '(Role)');
+
+		// deliberately only allow singles here - people should define roles!
+		$perms = new DropdownField('Perms', _t('PermissionTable.PERMS', 'Permission - use roles for multiple!'), AccessRole::allPermissions(), '', null, '(Permission)');
+
+		$detailFormFields = new FieldList(
+			$roles,
+			$perms,
+			$members,
+			$groups,
+			new DropdownField('Grant', _t('AccessAuthority.Grant', 'Grant Access'), $dummy->dbObject('Grant')->enumValues())
+		);
+		
+		return $detailFormFields;
+	}
+	
+	public function summaryFields() {
+		$fieldList = array(
+			'Type'					=> 'Type',
+			'getAuthority.Title'	=> 'Authority',
+			'Grant'					=> 'Grant',
+			'PermList'				=> 'Perms'
+		);
+
+		return $fieldList;
 	}
 }

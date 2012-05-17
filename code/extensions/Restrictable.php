@@ -172,7 +172,7 @@ class Restrictable extends DataExtension {
 		}
 	}
 
-	public function updateCMSFields(FieldSet $fields) {
+	public function updateCMSFields(FieldList $fields) {
 		// $controller, $name, $sourceClass, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = "", $sourceJoin = ""
 		$fieldPerms = $this->fieldPermissions();
 
@@ -184,14 +184,28 @@ class Restrictable extends DataExtension {
 				if ($hasField) {
 					$fields->makeFieldReadonly($fieldId);
 				}
-				
 			}
 		}
 
 		if ($this->owner->checkPerm('ViewPermissions')) {
-			$table = new PermissionTableField($this->owner, 'Authorities', 'AccessAuthority');
+			'"ItemID" = '.Convert::raw2sql($forObject->ID).' AND "ItemType" = \''.Convert::raw2sql($forObject->class).'\'';
+			$accessList = DataList::create('AccessAuthority', array('ItemID' => $forObject->ID, 'ItemType' => $forObject->class));
+			$listField = GridField::create(
+				'AccessAuthority',
+				false,
+				$accessList,
+				$fieldConfig = GridFieldConfig_RecordEditor::create(20)
+			);
+			
+			$fieldConfig->removeComponentsByType('GridFieldEditButton');
+			
+			// AccessAuthorityGridFieldDetailForm_ItemRequest
+			$detailForm = $fieldConfig->getComponentByType('GridFieldDetailForm');
+			$detailForm->setItemRequestClass('AccessAuthorityGridFieldDetailForm_ItemRequest');
+			$listField->forObject = $this->owner;
 
 			$perms = array('show');
+			
 			$rootTab = $fields->fieldByName('Root');
 			$fileRootTab = $fields->fieldByName('BottomRoot');
 			$addTo = null;
@@ -216,8 +230,8 @@ class Restrictable extends DataExtension {
 					$perms[] = 'delete';
 				}
 
-				$table->setPermissions($perms);
-				$addTo->push($table);
+//				$table->setPermissions($perms);
+				$addTo->push($listField);
 			}
 		}
 	}
