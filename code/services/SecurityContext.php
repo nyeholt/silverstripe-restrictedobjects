@@ -12,7 +12,7 @@ class SecurityContext {
 	protected $currentMember;
 	
 	public function __construct() {
-		$this->currentMember = $this->getMember();
+
 	}
 	
 	public function getMember() {

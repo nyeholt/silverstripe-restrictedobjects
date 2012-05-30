@@ -13,6 +13,7 @@ class RestrictedMember extends DataExtension {
 	}
 	
 	public function memberLoggedIn() {
+		
 		singleton('SecurityContext')->setMember($this->owner);
 	}
 }
