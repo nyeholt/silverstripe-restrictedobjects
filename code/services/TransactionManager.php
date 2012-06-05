@@ -14,7 +14,7 @@ class TransactionManager {
 	}
 	
 	public function run($closure, $as=null) {
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		$args = func_get_args();
 		array_shift($args);array_shift($args);
 		$current = singleton('SecurityContext')->getMember();
@@ -31,6 +31,6 @@ class TransactionManager {
 		if ($as) {
 			singleton('SecurityContext')->setMember($current);
 		}
-		DB::getConn()->endTransaction();
+		DB::getConn()->transactionEnd();
 	}
 }

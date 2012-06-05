@@ -19,7 +19,7 @@ class RestrictedSecurityController extends Security {
 			singleton('TransactionManager')->run(array($member, 'logOut'), Security::findAnAdministrator());
 		}
 
-		if($redirect) Director::redirectBack();
+		if($redirect) $this->redirectBack();
 
 		return '';
 	}
