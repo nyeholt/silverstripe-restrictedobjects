@@ -1,0 +1,5 @@
+
+Injector:
+  RestrictedMember: 
+    properties: 
+      securityContext: %$SecurityContext
