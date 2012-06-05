@@ -241,7 +241,7 @@ class Restrictable extends DataExtension {
 	 *
 	 * @param FieldSet $fields
 	 */
-	public function updateFrontEndFields(FieldSet $fields) {
+	public function updateFrontEndFields(FieldList $fields) {
 		if (!$this->owner->ID) {
 			$fields->replaceField('InheritPerms',new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions'), true));
 		}
