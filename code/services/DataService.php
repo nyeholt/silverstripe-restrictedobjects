@@ -120,7 +120,11 @@ class DataService {
 
 		$list = RestrictedDataList::create($type, $requiredPerm); 
 		if ($filter) {
-			$list->filter($filter);
+			if (is_array($filter)) {
+				$list->filter($filter);
+			} else {
+				$list->where($filter);
+			}
 		}
 		if ($sort) {
 			$list->sort($sort);
