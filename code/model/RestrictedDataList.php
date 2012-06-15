@@ -14,6 +14,27 @@ class RestrictedDataList extends DataList {
 		parent::__construct($dataClass);
 		$this->requiredPermission = $requiredPermission;
 	}
+	
+	/**
+	 * Return an array of the actual items that this DataList contains at this stage.
+	 * This is when the query is actually executed.
+	 *
+	 * @return array
+	 */
+	public function toArray() {
+		$query = $this->dataQuery->query();
+		$rows = $query->execute();
+		$results = array();
+		
+		foreach($rows as $row) {
+			$item = $this->createDataObject($row);
+			if ($item) {
+				$results[] = $item;
+			}
+		}
+		
+		return $results;
+	}
 
 	/**
 	 * Create a DataObject from the given SQL row
