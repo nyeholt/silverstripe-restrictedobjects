@@ -142,14 +142,15 @@ class PermissionService {
 
 		$type = $to instanceof Member ? 'Member' : 'Group';
 		$filter = array(
-			'Type =' => $type,
-			'AuthorityID =' => $to->ID,
-			'ItemID =' => $node->ID,
-			'ItemType =' => $node->class,
-			'Grant =' => $grant,
+			'Type'			=> $type,
+			'AuthorityID'	=> $to->ID,
+			'ItemID'		=> $node->ID,
+			'ItemType'		=> $node->class,
+			'Grant'			=> $grant,
 		);
-
-		$existing = DataObject::get_one('AccessAuthority', singleton('SiteUtils')->dbQuote($filter));
+		
+		$list = DataList::create('AccessAuthority')->filter($filter);
+		$existing = $list->first();
 		if (!$existing || !$existing->exists()) {
 			$existing = new AccessAuthority;
 			$existing->Type = $type;
@@ -322,12 +323,13 @@ class PermissionService {
 
 		if (!$directGrant) {
 			$filter = array(
-				'ItemID =' => $node->ID,
-				'ItemType =' => $node->class,
+				'ItemID'		=> $node->ID,
+				'ItemType'		=> $node->class,
 			);
 
+			$list = DataList::create('AccessAuthority')->filter($filter);
 			// get all access authorities for this object
-			$existing = DataObject::get('AccessAuthority', singleton('SiteUtils')->dbQuote($filter));
+			$existing = $list->first();
 
 			$groups = $member ? $member->Groups() : array();
 			$gids = array();
