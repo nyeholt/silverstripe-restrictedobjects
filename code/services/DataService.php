@@ -133,7 +133,7 @@ class DataService {
 			if (is_string($limit)) {
 				$limit = explode(',', $limit);
 			}
-			$list->limit($limit[0], $limit[1]);
+			$list->limit($limit[1], $limit[0]);
 		}
 		if ($join) {
 			$list->innerJoin($join);
