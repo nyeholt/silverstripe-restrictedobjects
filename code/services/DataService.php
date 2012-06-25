@@ -118,7 +118,7 @@ class DataService {
 			throw new Exception("DataObjects have been requested before the database is ready. Please ensure your database connection details are correct, your database has been built, and that you are not trying to query the database in _config.php.");
 		}
 
-		$list = RestrictedDataList::create($type, $requiredPerm); 
+		$list = DataList::create($type); 
 		if ($filter) {
 			if (is_array($filter)) {
 				$list->filter($filter);
@@ -145,8 +145,13 @@ class DataService {
 //		
 //		$ret = $this->buildDataObjectSet($records, $containerClass, $query, $dummy->class, $requiredPerm);
 //		if($ret) $ret->parseQueryLimit($query);
-		$ret = new ArrayList($list->toArray());
 		
+		$ret = $list->filterByCallback(function ($item) use ($requiredPerm) {
+			if ($item->hasExtension('Restrictable')) {
+				return $item->checkPerm($requiredPerm);
+			}
+			return $item->canView();
+		});
 		return $ret;
 	}
 	
