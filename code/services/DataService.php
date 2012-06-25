@@ -121,7 +121,7 @@ class DataService {
 		$list = DataList::create($type); 
 		if ($filter) {
 			if (is_array($filter)) {
-				$list->filter($filter);
+				$list = $list->filter($filter);
 			} else {
 				$list->where($filter);
 			}
