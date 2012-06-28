@@ -276,7 +276,7 @@ class Restrictable extends DataExtension {
 					$parent = $this->effectiveParent();
 					if ($parent && $parent->ID) {
 						// check create children
-						if (!$parent->canAddChildren()) {
+						if ($parent->hasMethod('canAddChildren') && !$parent->canAddChildren()) {
 							throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
 						}
 					}

@@ -327,9 +327,8 @@ class PermissionService {
 				'ItemType'		=> $node->class,
 			);
 
-			$list = DataList::create('AccessAuthority')->filter($filter);
+			$existing = DataList::create('AccessAuthority')->filter($filter);
 			// get all access authorities for this object
-			$existing = $list->first();
 
 			$groups = $member ? $member->Groups() : array();
 			$gids = array();
