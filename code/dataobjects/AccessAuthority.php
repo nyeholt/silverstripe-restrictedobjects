@@ -59,7 +59,7 @@ class AccessAuthority extends DataObject {
 		}
 	}
 	
-	public function canView() {
+	public function canView($member = null) {
 		return Member::currentUserID() > 0;
 	}
 	
