@@ -188,8 +188,8 @@ class Restrictable extends DataExtension {
 		}
 
 		if ($this->owner->checkPerm('ViewPermissions')) {
-			'"ItemID" = '.Convert::raw2sql($forObject->ID).' AND "ItemType" = \''.Convert::raw2sql($forObject->class).'\'';
-			$accessList = DataList::create('AccessAuthority', array('ItemID' => $forObject->ID, 'ItemType' => $forObject->class));
+			'"ItemID" = '.Convert::raw2sql($this->owner->ID).' AND "ItemType" = \''.Convert::raw2sql($this->owner->class).'\'';
+			$accessList = DataList::create('AccessAuthority', array('ItemID' => $this->owner->ID, 'ItemType' => $this->owner->class));
 			$listField = GridField::create(
 				'AccessAuthority',
 				false,
