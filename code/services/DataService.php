@@ -98,7 +98,7 @@ class DataService {
 			return $item;
 		}
 		
-		if ($item && $item->canView()) {
+		if ($item && !$item->hasExtension('Restrictable') && $item->canView()) {
 			return $item;
 		}
 	}
@@ -136,15 +136,17 @@ class DataService {
 			$list->limit($limit[1], $limit[0]);
 		}
 		if ($join) {
-			$list->innerJoin($join);
+			if (isset($join['table'])) {
+				$join = array($join);
+			}
+			foreach ($join as $joinVal) {
+				$list->innerJoin($joinVal['table'], $joinVal['clause']);
+				if (isset($joinVal['where'])) {
+					$list->where($joinVal['where']);
+				}
+			}
 		}
 		
-//		$query = $list->dataQuery(); // $dummy->extendedSQL($filter, $sort, $limit, $join);
-//		
-//		$records = $query->execute();
-//		
-//		$ret = $this->buildDataObjectSet($records, $containerClass, $query, $dummy->class, $requiredPerm);
-//		if($ret) $ret->parseQueryLimit($query);
 		
 		$ret = $list->filterByCallback(function ($item) use ($requiredPerm) {
 			if ($item->hasExtension('Restrictable')) {

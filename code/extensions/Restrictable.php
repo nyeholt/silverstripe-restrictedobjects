@@ -284,16 +284,22 @@ class Restrictable extends DataExtension {
 
 				// get the changed items first
 				$changed = $this->owner->getChangedFields(false, 2);
+				
+				$allowWrite = false;
 
 				// set the owner now so that our perm check in a second works.
 				if (!$this->owner->OwnerID && singleton('SecurityContext')->getMember()) {
 					$this->owner->OwnerID = singleton('SecurityContext')->getMember()->ID;
 					// ignore any changed fields setting for this field
 					unset($changed['OwnerID']);
+				} else if (!$this->owner->OwnerID && $this->owner instanceof Member) {
+					// allow the write to occur
+					unset($changed['OwnerID']);
+					$allowWrite = true;
 				}
 
 				// don't allow write
-				if (!$this->checkPerm('Write')) {
+				if (!$allowWrite && !$this->checkPerm('Write')) {
 					throw new PermissionDeniedException('Write', 'You must have write permission to ' . $this->owner->ClassName . ' #' . $this->owner->ID);
 				}
 
