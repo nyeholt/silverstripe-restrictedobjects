@@ -18,17 +18,10 @@ class AccessAuthority extends DataObject {
 		'ItemType'			=> 'Varchar',
 	);
 	
-	/**
-	 * ALTER TABLE `AccessAuthority` ADD INDEX ( `ItemID` , `ItemType` ) ;
-	 * 
-	 * The following has no effect - you need to manually create the relevant index defined above
-	 * 
-	 */
-//	public static $indexes = array(
-//		'ItemID', 'ItemType',
-//	);
+	public static $indexes = array(
+		'Item'		=> '(ItemID,ItemType)',
+	);
 	
-
 	public function getAuthority() {
 		if ($this->Type && $this->AuthorityID > 0) {
 			return DataObject::get_by_id($this->Type, $this->AuthorityID);

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Description of AccessRole
- *
+ * A grouping of low level permissions makes up a Role
+ * 
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
@@ -11,6 +11,10 @@ class AccessRole extends DataObject {
 		'Title'			=> 'Varchar',
 		'Description'	=> 'Text',
 		'Composes'		=> 'MultiValueField',
+	);
+	
+	public static $indexes = array(
+		'Title'			=> 'index',
 	);
 	
 	public function requireDefaultRecords() {
