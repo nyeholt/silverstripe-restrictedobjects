@@ -230,15 +230,15 @@ class PermissionService {
 		
 		$type = $userOrGroup instanceof Member ? 'Member' : 'Group';
 		$filter = array(
-			'Type =' => $type,
-			'AuthorityID =' => $userOrGroup->ID,
-			'ItemID =' => $node->ID,
-			'ItemType =' => $node->class,
-			'Grant =' => $grant,
+			'Type' => $type,
+			'AuthorityID' => $userOrGroup->ID,
+			'ItemID' => $node->ID,
+			'ItemType' => $node->class,
+			'Grant' => $grant,
 		);
 
-		$existing = DataObject::get_one('AccessAuthority', singleton('SiteUtils')->dbQuote($filter));
-
+		$existing = DataList::create('AccessAuthority')->filter($filter)->first();
+		
 		if (!$existing || !$existing->exists()) {
 			return;
 		}
