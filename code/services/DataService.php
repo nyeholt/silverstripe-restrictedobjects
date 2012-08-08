@@ -146,8 +146,7 @@ class DataService {
 				}
 			}
 		}
-		
-		
+
 		$ret = $list->filterByCallback(function ($item) use ($requiredPerm) {
 			if ($item->hasExtension('Restrictable')) {
 				return $item->checkPerm($requiredPerm);
