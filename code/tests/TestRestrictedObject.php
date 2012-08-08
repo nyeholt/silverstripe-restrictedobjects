@@ -16,12 +16,15 @@ class TestRestrictedObject extends SapphireTest {
 		parent::setUpOnce();
 		$this->requireDefaultRecordsFrom[] = 'AccessRole';
 		
+		Restrictable::set_enabled(false);
+		
 		// needs to be done this way to work around SS bug
 //		include_once dirname(dirname(__FILE__)).'/extensions/Restrictable.php';
 //		Object::add_extension('PrivateObject', 'Restrictable');
 	}
 	
 	public function setUp() {
+		Restrictable::set_enabled(false);
 		parent::setUp();
 		Restrictable::set_enabled(true);
 		singleton('PermissionService')->getCache()->clean('all');
@@ -112,7 +115,10 @@ class TestRestrictedObject extends SapphireTest {
 		
 		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
 		
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('NONADMIN');
+		Restrictable::set_enabled(true);
+		
 		$user = $this->cache_generatedMembers['NONADMIN'];
 		
 		$item = new PrivateObject();

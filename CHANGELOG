@@ -1,3 +1,10 @@
+2012-08-08 v1.0.1
+-----------------
+
+* Fixed issue with old querying used in removePermission
+* Minor change to index configuration
+* Minor test fixes
+
 2012-08-03 v1.0.0
 -----------------
 
