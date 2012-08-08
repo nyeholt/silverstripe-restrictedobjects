@@ -14,7 +14,7 @@ class AccessRole extends DataObject {
 	);
 	
 	public static $indexes = array(
-		'Title'			=> 'index',
+		'Title'			=> true,
 	);
 	
 	public function requireDefaultRecords() {
