@@ -147,9 +147,57 @@ class DataService {
 			}
 		}
 
-		$ret = $list->filterByCallback(function ($item) use ($requiredPerm) {
+		$ret = $this->filterList($list, $requiredPerm);
+
+		// properly recalculate the offset that we had to use by recursively calling loadObjects
+		// with the next page of info until we have enough, then return the actual offset used in the
+		// list of objects
+		if (isset($limit[1])) {
+			$targetNumber = $limit[1];
+			$count = $ret->count();
+			$lastCount = $count;
+			$newOffset = $limit[0];
+			$nextOffset = $newOffset + $limit[1];
+			while ($count < $targetNumber) {
+				$nextOffset = $newOffset = $newOffset + $limit[1];
+				$list->limit($limit[1], $newOffset);
+				foreach ($list as $item) {
+					$nextOffset++;
+					if ($item->hasExtension('Restrictable')) {
+						if ($item->checkPerm($requiredPerm)) {
+							$ret->push($item);
+						}
+					} else if ($item->canView()) {
+						$ret->push($item);
+					}
+
+					if ($ret->count() >= $targetNumber) {
+						break;
+					}
+				}
+
+				$count = $ret->count();
+				// if we haven't actually increased, we'll just bail here
+				if ($lastCount == $count) {
+					break;
+				}
+			}
+			
+			$ret->QueryOffset = $nextOffset;
+		}
+
+		return $ret;
+	}
+	
+	/**
+	 * Filter the given list to return the accessible objects
+	 * 
+	 * @param type $list 
+	 */
+	protected function filterList($list, $perm) {
+		$ret = $list->filterByCallback(function ($item) use ($perm) {
 			if ($item->hasExtension('Restrictable')) {
-				return $item->checkPerm($requiredPerm);
+				return $item->checkPerm($perm);
 			}
 			return $item->canView();
 		});
