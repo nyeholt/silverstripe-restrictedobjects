@@ -19,6 +19,7 @@ class TransactionManager {
 		if (!$admins) {
 			return;
 		}
+		$admin = Security::findAnAdministrator();
 		return $this->run($closure, $admin);
 	}
 	
