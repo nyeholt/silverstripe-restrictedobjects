@@ -1,3 +1,9 @@
+2012-08-16 v1.0.3
+-----------------
+
+* Added a runAsAdmin method to easily run a piece of code as an admin level
+  user without fiddling around with finding an admin first
+
 2012-08-09 v1.0.2
 -----------------
 

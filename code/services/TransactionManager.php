@@ -13,6 +13,15 @@ class TransactionManager {
 		
 	}
 	
+	public function runAsAdmin($closure) {
+		// TODO This is so horribly ugly - is there no better way to know that we're in dev/build for the first time?
+		$admins = Permission::get_members_by_permission('ADMIN')->First();
+		if (!$admins) {
+			return;
+		}
+		return $this->run($closure, $admin);
+	}
+	
 	public function run($closure, $as=null) {
 		DB::getConn()->transactionStart();
 		$args = func_get_args();
@@ -22,15 +31,18 @@ class TransactionManager {
 			singleton('SecurityContext')->setMember($as);
 		}
 		
+		$return = null;
 		if (is_array($closure)) {
-			call_user_func_array($closure, $args);
+			$return = call_user_func_array($closure, $args);
 		} else {
-			$closure();
+			$return = $closure();
 		}
 
 		if ($as) {
 			singleton('SecurityContext')->setMember($current);
 		}
 		DB::getConn()->transactionEnd();
+		
+		return $return;
 	}
 }
