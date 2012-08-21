@@ -275,6 +275,10 @@ class PermissionService {
 	 * @return type 
 	 */
 	public function checkPerm(DataObject $node, $perm, $member=null) {
+		if (!$node) {
+			return false;
+		}
+
 		if (!$member) {
 			$member = singleton('SecurityContext')->getMember();
 		}
