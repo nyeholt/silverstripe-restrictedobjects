@@ -1,0 +1,17 @@
+{
+	"name": "silverstripe/restrictedobjects",
+	"description": "Provides more advanced permission management for data objects in SilverStripe.",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "permissions"],
+	"license": "BSD-3-Clause",
+	"authors": [
+	{
+		"name": "Marcus Nyeholt",
+		"email": "marcus@silverstirpe.com.au"
+	}
+	],
+	"require":
+	{
+		"silverstripe/cms": ">=3.0.0"
+	}
+}

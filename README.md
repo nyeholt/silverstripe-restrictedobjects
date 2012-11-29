@@ -43,7 +43,7 @@ within areas that they have been allowed to create within.
 *  Marcus Nyeholt <marcus@silverstripe.com.au>
 
 ## Requirements
-* SilverStripe 2.4+
+* SilverStripe 3.0+
 
 ## Installation
 
