@@ -1,3 +1,10 @@
+2012-11-28 v1.0.4
+-----------------
+
+* Added a 'view_permission' static var that can be used for specifying a 
+  different permission required to 'view' a data object of a particular 
+  type when loaded via the DataService
+
 2012-08-16 v1.0.3
 -----------------
 

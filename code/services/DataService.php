@@ -214,7 +214,16 @@ class DataService {
 	 *
 	 * @return mixed The new objects in an object of type $containerClass
 	 */
-	function buildDataObjectSet($records, $containerClass = "DataObjectSet", $query = null, $baseClass = null, $requiredPerm = 'View') {
+	function buildDataObjectSet($records, $containerClass = "DataObjectSet", $query = null, $baseClass = null, $requiredPerm = null) {
+		if (!$requiredPerm) {
+			$requiredPerm = 'View';
+			if ($baseClass) {
+				$defaultViewPerm = Config::inst()->get($baseClass, 'view_permission', Config::FIRST_SET);
+				if ($defaultViewPerm) {
+					$requiredPerm = $defaultViewPerm;
+				}
+			}
+		}
 		foreach($records as $record) {
 			if(empty($record['RecordClassName'])) {
 				$record['RecordClassName'] = $record['ClassName'];
