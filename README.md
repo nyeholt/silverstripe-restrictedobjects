@@ -1,8 +1,5 @@
 # SilverStripe Restricted Objects module
 
-Note: The SilverStripe 2.4 compatible version of this module is now at 
-the ss24 branch!
-
 This module changes SilverStripe's object access module to be locked down
 as the default case, meaning that by default, there are NO permissions to
 an object except those explicitly granted to a user on a node (or tree), with
@@ -41,6 +38,14 @@ within areas that they have been allowed to create within.
 
 ## Maintainer Contacts
 *  Marcus Nyeholt <marcus@silverstripe.com.au>
+
+## Versions
+
+The master branch of this module is currently aiming for SilverStripe 3.1 compatibility
+
+* [SilverStripe 3.0 compatible version](https://github.com/nyeholt/silverstripe-restrictedobjects/tree/1.0)
+* [SilverStripe 2.4 compatible version](https://github.com/nyeholt/silverstripe-restrictedobjects/tree/ss24)
+
 
 ## Requirements
 * SilverStripe 3.0+

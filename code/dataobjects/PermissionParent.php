@@ -8,10 +8,10 @@
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class PermissionParent extends DataObject {
-	public static $db = array(
+	private static $db = array(
 		'Title'		=> 'Varchar',
 	);
-	public static $extensions = array(
+	private static $extensions = array(
 		'Restrictable',
 	);
 }

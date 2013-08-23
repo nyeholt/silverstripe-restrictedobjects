@@ -8,7 +8,7 @@
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class AccessAuthority extends DataObject {
-	public static $db = array(
+	private static $db = array(
 		'Type'				=> "Enum('Member,Group')",
 		'AuthorityID'		=> 'Int',
 		'Role'				=> 'Varchar',			// recorded so future role changes can propagate
@@ -18,7 +18,7 @@ class AccessAuthority extends DataObject {
 		'ItemType'			=> 'Varchar',
 	);
 	
-	public static $indexes = array(
+	private static $indexes = array(
 		'Item'		=> '(ItemID,ItemType)',
 	);
 	

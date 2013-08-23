@@ -13,16 +13,16 @@ class Restrictable extends DataExtension {
 	 */
 	protected static $enabled = true;
 	
-	public static $db = array(
+	private static $db = array(
 		'InheritPerms' => 'Boolean',
 		'PublicAccess' => 'Boolean',
 	);
 	
-	public static $has_one = array(
+	private static $has_one = array(
 		'Owner' => 'Member',
 	);
 	
-	public static $defaults = array(
+	private static $defaults = array(
 		'InheritPerms' => true,
 	);
 

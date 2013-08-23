@@ -7,13 +7,13 @@
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class AccessRole extends DataObject {
-	public static $db = array(
+	private static $db = array(
 		'Title'			=> 'Varchar',
 		'Description'	=> 'Text',
 		'Composes'		=> 'MultiValueField',
 	);
 	
-	public static $indexes = array(
+	private static $indexes = array(
 		'Title'			=> true,
 	);
 	

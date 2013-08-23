@@ -10,7 +10,7 @@
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class RestrictedObject extends DataObject {
-	public static $extensions = array(
+	private static $extensions = array(
 		'Restrictable',
 	);
 }
