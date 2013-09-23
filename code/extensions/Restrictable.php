@@ -145,7 +145,7 @@ class Restrictable extends DataExtension {
 	 * @return type 
 	 */
 	public function canView($member=null) {
-		if (self::$enabled && $this->owner->exists()) {
+		if (self::$enabled) {
 			$res = $this->checkPerm('View', $member);
 			return $res;
 		}
