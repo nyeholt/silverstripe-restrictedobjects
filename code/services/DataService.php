@@ -123,11 +123,11 @@ class DataService {
 			if (is_array($filter)) {
 				$list = $list->filter($filter);
 			} else {
-				$list->where($filter);
+				$list = $list->where($filter);
 			}
 		}
 		if ($sort) {
-			$list->sort($sort);
+			$list = $list->sort($sort);
 		}
 		if ($limit) {
 			if (is_string($limit)) {
