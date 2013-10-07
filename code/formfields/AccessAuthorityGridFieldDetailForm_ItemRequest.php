@@ -43,6 +43,15 @@ class AccessAuthorityGridFieldDetailForm_ItemRequest extends GridFieldDetailForm
 			$form->sessionMessage($message, 'bad');
 		}
 
-		return Controller::curr()->redirect($this->Link());
+		$controller = Controller::curr();
+		$crumbs = $this->Breadcrumbs();
+		if ($crumbs && $crumbs->count()>=2){
+			$one_level_up = $crumbs->offsetGet($crumbs->count()-2);
+			$link = $one_level_up->Link;
+		} else {
+			$link = $this->Link();
+		}
+		
+		return $controller->redirect($link);
 	}
 }
