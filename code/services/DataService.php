@@ -9,8 +9,6 @@
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class DataService {
-	public function __construct() {
-	}
 	
 	/**
 	 * Shortcut for loading objects. 
