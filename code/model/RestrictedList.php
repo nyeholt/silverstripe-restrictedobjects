@@ -21,7 +21,7 @@ class RestrictedList extends DataList {
 	 * @param string $roleOrPerm
 	 * @return \RestrictedList
 	 */
-	public function setPerm($roleOrPerm) {
+	public function requirePerm($roleOrPerm) {
 		$this->requiredPermission = $roleOrPerm;
 		return $this;
 	}
