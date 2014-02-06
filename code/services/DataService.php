@@ -131,16 +131,16 @@ class DataService {
 			if (is_string($limit)) {
 				$limit = explode(',', $limit);
 			}
-			$list->limit($limit[1], $limit[0]);
+			$list = $list->limit($limit[1], $limit[0]);
 		}
 		if ($join) {
 			if (isset($join['table'])) {
 				$join = array($join);
 			}
 			foreach ($join as $joinVal) {
-				$list->innerJoin($joinVal['table'], $joinVal['clause']);
+				$list = $list->innerJoin($joinVal['table'], $joinVal['clause']);
 				if (isset($joinVal['where'])) {
-					$list->where($joinVal['where']);
+					$list = $list->where($joinVal['where']);
 				}
 			}
 		}
