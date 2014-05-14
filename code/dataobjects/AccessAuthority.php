@@ -32,6 +32,11 @@ class AccessAuthority extends DataObject {
 		}
 	}
 	
+	public function getAuthorityTitle() {
+		$authority = $this->getAuthority();
+		return $authority ? $authority->Title : '';
+	}
+	
 	public function getItem() {
 		return DataObject::get_by_id($this->ItemType, $this->ItemID);
 	}
@@ -92,7 +97,7 @@ class AccessAuthority extends DataObject {
 	public function summaryFields() {
 		$fieldList = array(
 			'Type'					=> 'Type',
-			'getAuthority.Title'	=> 'Authority',
+			'getAuthorityTitle'		=> 'Authority',
 			'Grant'					=> 'Grant',
 			'PermList'				=> 'Perms'
 		);
