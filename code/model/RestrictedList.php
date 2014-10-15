@@ -1,8 +1,6 @@
 <?php
 
 /**
- * 
- *
  * @author <marcus@silverstripe.com.au>
  * @license BSD License http://www.silverstripe.org/bsd-license
  */
@@ -44,5 +42,19 @@ class RestrictedList extends DataList {
 		// we'll look at that later...
 		
 		return $results;
+	}
+	
+	public function byID($id) {
+		$item = parent::byID($id);
+
+		if (!$item) {
+			return $item;
+		}
+		
+		if ($item->hasExtension('Restrictable') && $item->checkPerm($this->requiredPermission)) {
+			return $item;
+		} else if ($item->canView()) {
+			return $item;
+		}
 	}
 }
