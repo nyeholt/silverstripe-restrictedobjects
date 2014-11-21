@@ -1,3 +1,9 @@
+---
+Name: restricted_objects_config
+---
+DataList:
+  extensions:
+    - RestrictedDataList
 
 Injector:
   RestrictedMember: 
