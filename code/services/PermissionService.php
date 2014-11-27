@@ -32,6 +32,10 @@ class PermissionService {
 	 * @var Zend_Cache_Core 
 	 */
 	protected $cache;
+	
+	protected $parents = array();
+	
+	protected $groups = array();
 
 	/**
 	 *
@@ -333,10 +337,15 @@ class PermissionService {
 			$existing = DataList::create('AccessAuthority')->filter($filter);
 			// get all access authorities for this object
 
-			$groups = $member ? $member->Groups() : array();
-			$gids = array();
-			if ($groups && $groups->Count()) {
-				$gids = $groups->map('ID', 'ID');
+			$gids = isset($this->groups[$member->ID]) ? $this->groups[$member->ID] : null;
+			if (!$gids) {
+				$groups = $member ? $member->Groups() : array();
+				$this->groups[$member->ID] = $groups;
+				$gids = array();
+				if ($groups && $groups->Count()) {
+					$gids = $groups->map('ID', 'ID');
+				}
+				$this->groups[$member->ID] = $gids;
 			}
 
 			$can = false;
@@ -391,7 +400,7 @@ class PermissionService {
 
 		// otherwise query our parents
 		if ($node->InheritPerms) {
-			$permParents = $node->effectiveParents();
+			$permParents = $this->getEffective('effectiveParents', $node);
 			if (count($permParents) || $permParents instanceof IteratorAggregate) {
 				foreach ($permParents as $permParent) {
 					if ($this->checkPerm($permParent, $perm, $member)) {
@@ -417,13 +426,70 @@ class PermissionService {
 			}
 
 			if($node->InheritPerms){
-				$parent = $node->effectiveParent();
+				$parent = $this->getEffective('effectiveParent', $node);
 				if ($parent) {
 					return $this->checkPublicPerms($parent, $perm);
-				}	
+				}
 			}
 		}
 		return false;
+	}
+	
+	protected function getEffective($type, $node) {
+		$key = $type . '-' . get_class($node) . '-' . $node->ID;
+		if (isset($this->parents[$key])) {
+			return $this->parents[$key];
+		}
+		
+		// determine what we're looking up
+		if (method_exists($node, $type)) {
+			$this->parents[$key] = $node->$type();
+			return $this->parents[$key];
+		}
+		
+		// otherwise, put it together ourselves
+		$result = null;
+		if ($type == 'effectiveParent') {
+			if (method_exists($node, 'permissionSource')) {
+				$result = $node->permissionSource();
+			} else {
+				$result = $this->parentFor($node);
+				if ($result && !$result->ID) {
+					$result = null;
+				}
+			}
+		} else {
+			if (method_exists($node, 'permissionSources')) {
+				$result = $node->permissionSources();
+			} else {
+				$result = new ArrayObject();
+				
+				$parent = $this->parentFor($node);
+				if ($parent && $parent->ID) {
+					$result[] = $parent;
+				}
+				if (method_exists($node, 'permissionSource')) {
+					$result[] = $node->permissionSource();
+				}
+			}
+		}
+		
+		$this->parents[$key] = $result;
+		return $result;
+	}
+	
+	protected function parentFor($node) {
+		if (!$node->ParentID) {
+			return;
+		}
+
+		$key = 'parent-' . get_class($node) . '-' . $node->ParentID;
+		if (isset($this->parents[$key])) {
+			return $this->parents[$key];
+		} 
+
+		$this->parents[$key] = $node->Parent();
+		return $this->parents[$key];
 	}
 
 	/**

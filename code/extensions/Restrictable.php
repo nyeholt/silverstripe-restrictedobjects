@@ -77,39 +77,6 @@ class Restrictable extends DataExtension {
 	}
 
 	/**
-	 * Returns the effective parent of a given node for permission purposes
-	 * 
-	 * Allows objects that aren't in a traditional Parent/Child relationship
-	 * to indicate where their permissions are coming from
-	 *
-	 * @deprecated
-	 */
-	public function effectiveParent() {
-		$permParent = null;
-		if ($this->owner->hasMethod('permissionSource')) {
-			$permParent = $this->owner->permissionSource();
-		} else if ($this->owner->ParentID) {
-			$permParent = $this->owner->Parent();
-		}
-		return $permParent;
-	}
-
-	/**
-	 * Return a list of all parents of this node
-	 */
-	public function effectiveParents() {
-		$permParents = new ArrayObject();
-		if ($this->owner->hasMethod('permissionSource')) {
-			$permParents[] = $this->owner->permissionSource();
-		} else if ($this->owner->hasMethod('permissionSources')) {
-			$permParents = $this->owner->permissionSources();
-		} else if ($this->owner->ParentID) {
-			$permParents[] = $this->owner->Parent();
-		}
-		return $permParents;
-	}
-
-	/**
 	 * Allow users to specify an array of field level permission requirements on a content
 	 * object that will be checked when editing items. 
 	 * 
@@ -146,6 +113,10 @@ class Restrictable extends DataExtension {
 	 */
 	public function canView($member=null) {
 		if (self::$enabled) {
+			// see if we're on a page, and its ID is -1, which is always vieable
+			if ($this->owner->ID === -1) {
+				return true;
+			}
 			$res = $this->checkPerm('View', $member);
 			return $res;
 		}
@@ -171,8 +142,15 @@ class Restrictable extends DataExtension {
 			return $res;
 		}
 	}
+	
+	public function updateCMSFields(\FieldList $fields) {
+		if ($this->owner instanceof SiteTree) {
+			return;
+		}
+		return $this->updateSettingsFields($fields);
+	}
 
-	public function updateCMSFields(FieldList $fields) {
+	public function updateSettingsFields(\FieldList $fields) {
 		// $controller, $name, $sourceClass, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = "", $sourceJoin = ""
 		$fieldPerms = $this->fieldPermissions();
 
