@@ -253,7 +253,7 @@ class Restrictable extends DataExtension {
 			try {
 				// see if we're actually allowed to do this!
 				if (!$this->owner->ID) {
-					$parent = $this->effectiveParent();
+					$parent = singleton('PermissionService')->getEffective('effectiveParent', $this->owner);
 					if ($parent && $parent->ID) {
 						// check create children
 						if ($parent->hasMethod('canAddChildren') && !$parent->canAddChildren()) {

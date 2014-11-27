@@ -435,7 +435,7 @@ class PermissionService {
 		return false;
 	}
 	
-	protected function getEffective($type, $node) {
+	public function getEffective($type, $node) {
 		$key = $type . '-' . get_class($node) . '-' . $node->ID;
 		if (isset($this->parents[$key])) {
 			return $this->parents[$key];
