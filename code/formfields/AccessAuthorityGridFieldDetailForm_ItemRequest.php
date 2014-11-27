@@ -52,6 +52,7 @@ class AccessAuthorityGridFieldDetailForm_ItemRequest extends GridFieldDetailForm
 			$link = $this->Link();
 		}
 		
+		$controller->getRequest()->addHeader('X-Pjax', 'Content'); 
 		return $controller->redirect($link);
 	}
 }
