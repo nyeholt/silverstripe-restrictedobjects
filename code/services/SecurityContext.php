@@ -7,7 +7,7 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class SecurityContext {
+class SecurityContext implements TemplateGlobalProvider {
 	
 	protected $currentMember;
 	
@@ -33,4 +33,16 @@ class SecurityContext {
 	public function setMember($member) {
 		$this->currentMember = $member;
 	}
+	
+	public static function ContextUser() {
+		$securityContext = Injector::inst()->get('SecurityContext');
+		return $securityContext->getMember();
+	}
+
+	public static function get_template_global_variables() {
+		return array(
+			'ContextUser'
+		);
+	}
+
 }
