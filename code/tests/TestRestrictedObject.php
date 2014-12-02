@@ -14,8 +14,6 @@ class TestRestrictedObject extends SapphireTest {
 	
 	public function setUpOnce() {
 		parent::setUpOnce();
-		$this->requireDefaultRecordsFrom[] = 'AccessRole';
-		
 		Restrictable::set_enabled(false);
 		
 		// needs to be done this way to work around SS bug
@@ -26,8 +24,12 @@ class TestRestrictedObject extends SapphireTest {
 	public function setUp() {
 		Restrictable::set_enabled(false);
 		parent::setUp();
+		
 		Restrictable::set_enabled(true);
 		singleton('PermissionService')->getCache()->clean('all');
+		
+		$instance = singleton('AccessRole');
+		if (method_exists($instance, 'requireDefaultRecords')) $instance->requireDefaultRecords();
 	}
 	
 	public function testGrant() {
@@ -150,6 +152,49 @@ class TestRestrictedObject extends SapphireTest {
 		
 		
 	}	
+	
+	public function testPagination() {
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('OTHERUSER');
+		Restrictable::set_enabled(true);
+		
+		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$user = $this->cache_generatedMembers['ADMIN'];
+		
+		$security = singleton('SecurityContext');
+		
+		$not = array();
+		$granted = array();
+		
+		for ($i = 0; $i < 100; $i++) {
+			$item = new PrivateObject();
+			$item->Title = 'Pagination item ' . $i;
+			$item->write();
+			
+			if ($i % 5 === 0) {
+				$item->grant('View', $otherUser);
+				$granted[] = $item;
+			} else {
+				$not[] = $item;
+			}
+		}
+		
+		$this->logInWithPermission('OTHERUSER');
+		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
+		
+		$can = $granted[0]->checkPerm('View');
+		$cant = $not[0]->checkPerm('View');
+		
+		$list = PrivateObject::get()->sort('ID DESC')->limit(10)->restrict();
+		
+		$this->assertEquals(10, $list->count());
+	}
 }
 
 class PrivateObject extends DataObject implements TestOnly {

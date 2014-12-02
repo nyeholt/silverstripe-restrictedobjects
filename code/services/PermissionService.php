@@ -61,6 +61,7 @@ class PermissionService {
 //			'groups'			=> DataObject::get('Group')
 		);
 	}
+	
 
 	protected $allPermissions;
 
@@ -78,6 +79,11 @@ class PermissionService {
 		}
 
 		return $this->allPermissions;
+	}
+	
+	public function flushCache() {
+		$this->parents = array();
+		$this->groups = array();
 	}
 
 	/**
@@ -474,7 +480,9 @@ class PermissionService {
 			}
 		}
 		
-		$this->parents[$key] = $result;
+		if ($key && $node->ID) {
+			$this->parents[$key] = $result;
+		}
 		return $result;
 	}
 	
