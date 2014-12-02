@@ -18,3 +18,5 @@ Object::add_extension('Member', 'RestrictedMember');
 if ((Director::isDev() || Director::is_cli()) && isset($_GET['disable_perms'])) {
 	Restrictable::set_enabled(false);
 }
+
+SS_Cache::set_cache_lifetime('restricted_perms', 3600);
