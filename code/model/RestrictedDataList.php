@@ -24,10 +24,6 @@ class RestrictedDataList extends Extension {
 		
 		$listCount = $list->count();
 		
-		if ($unrestrictedCount == $listCount) {
-			return $list;
-		}
-		
 		// otherwise we need to get the 
 		$limitInfo = $this->owner->dataQuery()->getFinalisedQuery()->getLimit();
 		if (isset($limitInfo['limit'])) {
@@ -35,7 +31,15 @@ class RestrictedDataList extends Extension {
 		} else {
 			$limit = 0;
 		}
-		
+
+		if ($limit) {
+			$list->QueryOffset = $limitInfo['start'] + $limit;
+		}
+
+		if ($unrestrictedCount == $listCount) {
+			return $list;
+		}
+
 		if ($limit && $unrestrictedCount == $limit) {
 			$targetNumber = (int) trim($limit);
 			$count = $list->count();
@@ -68,8 +72,6 @@ class RestrictedDataList extends Extension {
 			
 			$list->QueryOffset = $nextOffset;
 		}
-		
-		
 		
 		return $list;
 	}
