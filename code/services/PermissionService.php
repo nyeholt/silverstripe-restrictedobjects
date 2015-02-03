@@ -550,21 +550,25 @@ class PermissionService {
 	public function getPermissionsFor(DataObject $node, $includeInherited = false) {
 		if ($this->checkPerm($node, 'ViewPermissions')) {
 			$authorities = $node->getAuthorities();
+			$formatted = ArrayList::create();
+			
 			if (!$authorities) {
-				$authorities = new DataObjectSet();
+				$formatted = ArrayList::create();
 			} else {
 				foreach ($authorities as $authority) {
 					$auth = $authority->getAuthority();
 					if ($auth) {
 						$authority->DisplayName = $auth->getTitle();
 						$authority->PermList = implode(', ', $authority->Perms->getValues());
+						
 					} else {
 						$authority->DisplayName = 'INVALID AUTHORITY: #' . $authority->ID;
 					}
 					
+					$formatted->push($authority);
 				}
 			}
-			return $authorities;
+			return $formatted;
 		}
 	}
 
