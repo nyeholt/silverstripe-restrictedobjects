@@ -13,6 +13,6 @@
 	"require":
 	{
 		"silverstripe/cms": ">=3.0.0",
-		"silverstripe/multivaluefield": "dev-master"
+		"silverstripe/multivaluefield": "~2.0"
 	}
 }
