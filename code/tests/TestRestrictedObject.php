@@ -195,6 +195,44 @@ class TestRestrictedObject extends SapphireTest {
 		
 		$this->assertEquals(10, $list->count());
 	}
+	
+	public function testSimpleMemberList() {
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$user = $this->cache_generatedMembers['ADMIN'];
+		$item = new PrivateObject();
+		$item->Title = 'testCan item ';
+		$item->write();
+
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('OTHERUSER');
+		Restrictable::set_enabled(true);
+		
+		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
+		
+		$can = $item->checkPerm('View');
+		$this->assertFalse($can);
+		
+		$this->logInWithPermission('ADMIN');
+		
+		// grant the new list permissions 
+		$list = SimpleMemberList::create(array('Title' => 'test simple list'));
+		$list->write();
+		
+		$item->grant('View', $list);
+		
+		$list->Members()->add($otherUser);
+		
+		$this->logInWithPermission('OTHERUSER');
+		
+		$can = $item->checkPerm('View');
+		$this->assertTrue($can);
+		
+	}
 }
 
 class PrivateObject extends DataObject implements TestOnly {

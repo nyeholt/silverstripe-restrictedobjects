@@ -11,6 +11,6 @@ class RestrictedObjectsAdmin extends ModelAdmin {
 	private static $menu_title = 'Restricted Objects';
 	
 	private static $managed_models = array(
-		'AccessRole', 'PermissionParent'
+		'AccessRole', 'PermissionParent', 'SimpleMemberList'
 	);
 }

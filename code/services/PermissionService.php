@@ -150,7 +150,7 @@ class PermissionService {
 			$composedOf = $role->Composes->getValues();
 		}
 
-		$type = $to instanceof Member ? 'Member' : 'Group';
+		$type = $to instanceof Member ? 'Member' : get_class($to);
 		$filter = array(
 			'Type'			=> $type,
 			'AuthorityID'	=> $to->ID,
@@ -238,7 +238,7 @@ class PermissionService {
 			}
 		}
 		
-		$type = $userOrGroup instanceof Member ? 'Member' : 'Group';
+		$type = $userOrGroup instanceof Member ? 'Member' : get_class($userOrGroup);
 		$filter = array(
 			'Type' => $type,
 			'AuthorityID' => $userOrGroup->ID,
@@ -346,7 +346,6 @@ class PermissionService {
 			$gids = isset($this->groups[$member->ID]) ? $this->groups[$member->ID] : null;
 			if (!$gids) {
 				$groups = $member ? $member->Groups() : array();
-				$this->groups[$member->ID] = $groups;
 				$gids = array();
 				if ($groups && $groups->Count()) {
 					$gids = $groups->map('ID', 'ID');
@@ -371,16 +370,26 @@ class PermissionService {
 						if (isset($gids[$access->AuthorityID])) {
 							$grant = $access->Grant;
 						}
-					} else {
+					} else if ($access->Type == 'Member') {
 						if ($member->ID == $access->AuthorityID) {
 							$grant = $access->Grant;
+						}
+					} else {
+						// another mechanism that will require a lookup of members in a list
+						// TODO cache this
+						$authority = $access->getAuthority();
+						if ($authority instanceof ListOfMembers) {
+							$listMembers = $authority->getAllMembers()->map('ID', 'Title');
+							if (isset($listMembers[$member->ID])) {
+								$grant = $access->Grant;
+							}
 						}
 					}
 
 					if ($grant) {
 						// if it's deny, we can just break away immediately, otherwise we need to evaluate all the 
 						// others in case there's another DENY in there somewhere
-						if ($grant == 'DENY') {
+						if ($grant === 'DENY') {
 							$directGrant = 'DENY';
 							// immediately break
 							break;

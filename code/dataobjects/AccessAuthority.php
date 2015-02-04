@@ -9,7 +9,7 @@
  */
 class AccessAuthority extends DataObject {
 	private static $db = array(
-		'Type'				=> "Enum('Member,Group')",
+		'Type'				=> "Varchar(64)",
 		'AuthorityID'		=> 'Int',
 		'Role'				=> 'Varchar',			// recorded so future role changes can propagate
 		'Perms'				=> 'MultiValueField',
