@@ -6,6 +6,12 @@
  */
 class RestrictedDataList extends Extension {
 	
+	/**
+	 * How many 'next' pages we look for new items before 
+	 * assuming there's no more to find
+	 */
+	const MAX_FETCH_DEPTH = 10;
+	
 	public function restrict($perm = 'View') {
 		$restrictFilter = function ($item) use ($perm) {
 			if ($item->hasExtension('Restrictable') && $item->checkPerm($perm)) {
@@ -44,6 +50,7 @@ class RestrictedDataList extends Extension {
 			$targetNumber = (int) trim($limit);
 			$count = $list->count();
 			$lastCount = $count;
+			$numSearches = 0;
 			$newOffset = $limitInfo['start'];
 			while ($count < $targetNumber) {
 				$nextOffset = $newOffset = $newOffset + $targetNumber;
@@ -65,9 +72,10 @@ class RestrictedDataList extends Extension {
 
 				$count = $list->count();
 				// if we haven't actually increased, we'll just bail here
-				if ($lastCount == $count) {
+				if ($lastCount == $count && $numSearches++ > self::MAX_FETCH_DEPTH) {
 					break;
 				}
+				$lastCount = $count;
 			}
 			
 			$list->QueryOffset = $nextOffset;
