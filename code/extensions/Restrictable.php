@@ -166,21 +166,24 @@ class Restrictable extends DataExtension {
 		}
 
 		if ($this->owner->checkPerm('ViewPermissions')) {
+			$listField = null;
 			
-			$accessList = DataList::create('AccessAuthority')->filter(array('ItemID' => $this->owner->ID, 'ItemType' => $this->owner->class));
-			$listField = GridField::create(
-				'AccessAuthority',
-				false,
-				$accessList,
-				$fieldConfig = GridFieldConfig_RecordEditor::create(20)
-			);
+			if ($this->owner->ID) {
+				$accessList = DataList::create('AccessAuthority')->filter(array('ItemID' => $this->owner->ID, 'ItemType' => $this->owner->class));
+				$listField = GridField::create(
+					'AccessAuthority',
+					false,
+					$accessList,
+					$fieldConfig = GridFieldConfig_RecordEditor::create(20)
+				);
 
-			$fieldConfig->removeComponentsByType('GridFieldEditButton');
-			
-			// AccessAuthorityGridFieldDetailForm_ItemRequest
-			$detailForm = $fieldConfig->getComponentByType('GridFieldDetailForm');
-			$detailForm->setItemRequestClass('AccessAuthorityGridFieldDetailForm_ItemRequest');
-			$listField->forObject = $this->owner;
+				$fieldConfig->removeComponentsByType('GridFieldEditButton');
+
+				// AccessAuthorityGridFieldDetailForm_ItemRequest
+				$detailForm = $fieldConfig->getComponentByType('GridFieldDetailForm');
+				$detailForm->setItemRequestClass('AccessAuthorityGridFieldDetailForm_ItemRequest');
+				$listField->forObject = $this->owner;
+			}
 
 			$perms = array('show');
 			
@@ -208,8 +211,9 @@ class Restrictable extends DataExtension {
 					$perms[] = 'delete';
 				}
 
-//				$table->setPermissions($perms);
-				$addTo->push($listField);
+				if ($listField) {
+					$addTo->push($listField);
+				}
 			}
 		}
 	}
