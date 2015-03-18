@@ -204,7 +204,9 @@ class Restrictable extends DataExtension {
 				}
 
 				if ($this->checkPerm('TakeOwnership')) {
-					$addTo->push(new DropdownField('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title')));
+					$df = DropdownField::create('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title'));
+					$df->setEmptyString(_t('RestrictedObjects.CHOOSE_NEW_OWNER', '(choose a new owner)'));
+					$addTo->push($df);
 				}
 
 				if ($this->owner->checkPerm('DeletePermissions')) {
