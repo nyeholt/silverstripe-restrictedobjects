@@ -418,7 +418,7 @@ class PermissionService {
 			$permParents = $this->getEffective('effectiveParents', $node);
 			if (count($permParents) || $permParents instanceof IteratorAggregate) {
 				foreach ($permParents as $permParent) {
-					if ($this->checkPerm($permParent, $perm, $member)) {
+					if ($permParent && $this->checkPerm($permParent, $perm, $member)) {
 						return true;
 					}
 				}
