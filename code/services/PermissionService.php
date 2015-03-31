@@ -545,6 +545,9 @@ class PermissionService {
 				if (is_array($perms)) {
 					$cache->save($perms, 'ownerperms');
 				}
+			} else {
+				// just fall back to checking OwnerID == $member->ID
+				return $ownerId == $member->ID;
 			}
 		}
 
