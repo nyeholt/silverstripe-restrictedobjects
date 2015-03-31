@@ -484,7 +484,10 @@ class PermissionService {
 					$result[] = $parent;
 				}
 				if (method_exists($node, 'permissionSource')) {
-					$result[] = $node->permissionSource();
+					$parent = $node->permissionSource();
+					if ($parent) {
+						$result[] = $parent;
+					}
 				}
 			}
 		}
