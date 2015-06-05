@@ -25,7 +25,7 @@
 		});
 
 		// we search for any .permissionManager, and get the info
-		$(".permissionManager").live("click", function() {
+		$(document).on('click', ".permissionManager", function() {
 			initialiseDialog($(this).data("object"));
 			return false;
 		});
