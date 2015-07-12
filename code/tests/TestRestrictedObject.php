@@ -217,7 +217,9 @@ class TestRestrictedObject extends SapphireTest {
 		$can = $item->checkPerm('View');
 		$this->assertFalse($can);
 		
+		Restrictable::set_enabled(false);
 		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
 		
 		// grant the new list permissions 
 		$list = SimpleMemberList::create(array('Title' => 'test simple list'));

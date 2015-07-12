@@ -28,8 +28,11 @@ class TestTransactionManager extends SapphireTest {
 		$item->Title = 'By first';
 		$item->write();
 		$this->assertTrue($item->OwnerID == $first->ID);
-				
+
+		Restrictable::set_enabled(false);
 		$this->loginWithPermission('SECOND');
+		Restrictable::set_enabled(true);
+		
 		$second = $this->cache_generatedMembers['SECOND'];
 		
 		$other = new TransTestObj();
