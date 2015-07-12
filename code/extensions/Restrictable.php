@@ -257,13 +257,16 @@ class Restrictable extends DataExtension {
 	public function onBeforeWrite() {
 		if (self::$enabled) {
 			try {
+				singleton('PermissionService')->clearPermCacheFor($this->owner);
 				// see if we're actually allowed to do this!
 				if (!$this->owner->ID) {
-					$parent = singleton('PermissionService')->getEffective('effectiveParent', $this->owner);
-					if ($parent && $parent->ID) {
-						// check create children
-						if ($parent->hasMethod('canAddChildren') && !$parent->canAddChildren()) {
-							throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
+					$parents = singleton('PermissionService')->getEffectiveParents($this->owner);
+					if ($parents && count($parents)) {
+						foreach ($parents as $parent) {
+							// check create children
+							if ($parent->hasMethod('canAddChildren') && !$parent->canAddChildren()) {
+								throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
+							}
 						}
 					}
 				}
