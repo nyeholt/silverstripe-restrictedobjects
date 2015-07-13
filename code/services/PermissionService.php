@@ -311,7 +311,6 @@ class PermissionService {
 		} else {
 			$o = 0;
 		}
-		 
 		
 		if ($userGrants && isset($userGrants[$perm][$member->ID])) {
 			return $userGrants[$perm][$member->ID];
@@ -319,8 +318,14 @@ class PermissionService {
 
 		// okay, we need to build up all the info we have about the node for permissions
 		$s = $this->realiseAllSources($node);
-
-		$userGrants = array($perm => array());
+		
+		if (!$userGrants) {
+			$userGrants = array();
+		}
+		if (!isset($userGrants[$perm])) {
+			$userGrants[$perm] = array();
+		}
+		
 		$result = null;
 
 		// if no member, just check public view
@@ -431,6 +436,10 @@ class PermissionService {
 					}
 				}
 			}
+			
+		}
+
+		if (is_null($result)) {
 			$result = false;
 		}
 
@@ -502,13 +511,7 @@ class PermissionService {
 			foreach ($result as $r) {
 				$fullResult[] = $r;
 			}
-		} else {
-			$result = new ArrayObject();
-			$parent = $this->parentFor($node);
-			if ($parent && $parent->ID) {
-				$fullResult[] = $parent;
-			}
-		}
+		} 
 
 		if ($key && $node->ID) {
 			$this->parents[$key] = $fullResult;

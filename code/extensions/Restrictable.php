@@ -259,6 +259,10 @@ class Restrictable extends DataExtension {
 			try {
 				singleton('PermissionService')->clearPermCacheFor($this->owner);
 				// see if we're actually allowed to do this!
+				
+				// track whether a new node has parents to inherit perms from. We use this to determine
+				// whether to allow/disallow assigning current user as owner
+				$newNodeParentsCan = false;
 				if (!$this->owner->ID) {
 					$parents = singleton('PermissionService')->getEffectiveParents($this->owner);
 					if ($parents && count($parents)) {
@@ -268,6 +272,7 @@ class Restrictable extends DataExtension {
 								throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
 							}
 						}
+						$newNodeParentsCan = true;
 					}
 				}
 
@@ -281,6 +286,11 @@ class Restrictable extends DataExtension {
 					$this->owner->OwnerID = singleton('SecurityContext')->getMember()->ID;
 					// ignore any changed fields setting for this field
 					unset($changed['OwnerID']);
+					
+					// if this is a new node, and its parents didn't fail
+					if (!$newNodeParentsCan) {
+						$allowWrite = true;
+					}
 				} else if (!$this->owner->OwnerID && $this->owner instanceof Member) {
 					// allow the write to occur
 					unset($changed['OwnerID']);
@@ -305,6 +315,10 @@ class Restrictable extends DataExtension {
 					}
 				}
 			} catch (PermissionDeniedException $pde) {
+				// make sure there's a site config before triggering permissionFailure.
+				singleton('TransactionManager')->runAsAdmin(function () {
+					SiteConfig::current_site_config();
+				});
 				Security::permissionFailure();
 				throw $pde;
 			}

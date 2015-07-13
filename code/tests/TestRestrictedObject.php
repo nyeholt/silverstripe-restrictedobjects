@@ -68,6 +68,8 @@ class TestRestrictedObject extends SapphireTest {
 		$item->grant('Manager', Member::currentUser());
 		$item->grant('Manager', $otherUser);
 
+		$this->logInWithPermission('OTHERUSER');
+		
 		$can = $item->checkPerm('View');
 		$this->assertTrue($can);
 
@@ -77,6 +79,10 @@ class TestRestrictedObject extends SapphireTest {
 		
 		$can = singleton('PermissionService')->checkRole($item, 'Manager');
 		$this->assertTrue($can);
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
 		
 		// try inherited items
 		$otherItem = new PrivateObject();
