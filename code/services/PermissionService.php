@@ -312,7 +312,7 @@ class PermissionService {
 			$o = 0;
 		}
 		
-		if ($userGrants && isset($userGrants[$perm][$member->ID])) {
+		if ($member && $userGrants && isset($userGrants[$perm][$member->ID])) {
 			return $userGrants[$perm][$member->ID];
 		} 
 
@@ -334,8 +334,10 @@ class PermissionService {
 		if ($public) {
 			$result = true;
 		}
+		
+		// can return immediately
 		if (!$member) {
-			$result = false;
+			return false;
 		}
 
 		if (is_null($result)) {
