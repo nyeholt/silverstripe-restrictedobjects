@@ -68,6 +68,8 @@ class TestRestrictedObject extends SapphireTest {
 		$item->grant('Manager', Member::currentUser());
 		$item->grant('Manager', $otherUser);
 
+		$this->logInWithPermission('OTHERUSER');
+		
 		$can = $item->checkPerm('View');
 		$this->assertTrue($can);
 
@@ -77,6 +79,10 @@ class TestRestrictedObject extends SapphireTest {
 		
 		$can = singleton('PermissionService')->checkRole($item, 'Manager');
 		$this->assertTrue($can);
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
 		
 		// try inherited items
 		$otherItem = new PrivateObject();
@@ -108,6 +114,115 @@ class TestRestrictedObject extends SapphireTest {
 		// now try just deleting the permission
 		singleton('PermissionService')->removePermissions($item, 'Publish', Member::currentUser());
 		$this->assertFalse($item->checkPerm('Publish'));
+	}
+	
+	public function testInheritedPermissions() {
+		$svc = singleton('PermissionService');
+		/* @var $svc PermissionService */
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$user = $this->cache_generatedMembers['ADMIN'];
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('USERONE');
+		Restrictable::set_enabled(true);
+		
+		$user1 = $this->cache_generatedMembers['USERONE'];
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('USERTWO');
+		Restrictable::set_enabled(true);
+		
+		$user2 = $this->cache_generatedMembers['USERTWO'];
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$item = array();
+		
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Treetop';
+		$o->write();
+		
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Left branch';
+		$o->ParentID = $item[0]->ID;
+		$o->write();
+		
+		$item[] = $o = new PrivateObject();
+		$o->ParentID = $item[0]->ID;
+		$o->Title = 'Right branch';
+		$o->write();
+		
+		// 3
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Lgk1';
+		$o->ParentID = $item[1]->ID;
+		$o->write();
+		// 4
+		$item[] = $o = new PrivateObject();
+		$o->ParentID = $item[1]->ID;
+		$o->Title = 'Lgk2';
+		$o->write();
+		
+		// 5
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Rgk1';
+		$o->ParentID = $item[2]->ID;
+		$o->write();
+		// 6
+		$item[] = $o = new PrivateObject();
+		$o->ParentID = $item[2]->ID;
+		$o->Title = 'Rgk2';
+		$o->write();
+		
+		$this->assertFalse($item[0]->checkPerm('View', $user1));
+		$this->assertFalse($item[0]->checkPerm('View', $user2));
+		
+		$this->assertFalse($o->checkPerm('View', $user1));
+		$this->assertFalse($o->checkPerm('View', $user2));
+		
+		$item[0]->grant('Manager', $user1);
+		$item[2]->grant('Editor', $user2);
+		
+		// user1 can view all
+		foreach ($item as $i) {
+			$this->assertTrue($i->checkPerm('View', $user1));
+			$this->assertTrue($svc->checkRole($i, 'Manager', $user1));
+		}
+		
+		// user2 not so much
+		$this->assertTrue($svc->checkPerm($item[5], 'View', $user2));
+		$this->assertTrue($svc->checkPerm($item[6], 'View', $user2));
+		$this->assertTrue($svc->checkRole($item[5], 'Editor', $user2));
+		$this->assertTrue($svc->checkRole($item[6], 'Editor', $user2));
+		
+		$this->assertFalse($item[0]->checkPerm('View', $user2));
+		$this->assertFalse($item[3]->checkPerm('View', $user2));
+		$this->assertFalse($item[4]->checkPerm('View', $user2));
+		
+		$svc->removePermissions($item[2], 'Editor', $user2);
+		
+		$this->assertFalse($svc->checkPerm($item[5], 'View', $user2));
+		$this->assertFalse($svc->checkPerm($item[6], 'View', $user2));
+		
+		$item[0]->grant('Editor', $user2);
+		
+		// re-affirm 'can'
+		$this->assertTrue($svc->checkPerm($item[5], 'View', $user2));
+		
+		$this->assertTrue($svc->checkPerm($item[4], 'View', $user2));
+		$this->assertTrue($svc->checkPerm($item[3], 'View', $user2));
+		$this->assertTrue($svc->checkPerm($item[1], 'View', $user2));
+		
+		// now try deny in between
+		$item[1]->deny('View', $user2);
+		$this->assertFalse($item[3]->checkPerm('View', $user2));
+		$this->assertFalse($item[4]->checkPerm('View', $user2));
 	}
 	
 	function testOwnership() {

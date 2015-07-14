@@ -9,6 +9,8 @@
  */
 class PermissionService {
 	
+	const SOURCES_MAP = 'sources_map';
+	
 	public function __construct() {
 	}
 	
@@ -182,9 +184,7 @@ class PermissionService {
 		$existing->Perms = $new;
 		$existing->write();
 
-		foreach ($new as $perm) {
-			$this->clearPermCacheFor($node, $perm);
-		}
+		$this->clearPermCacheFor($node);
 
 		return $existing;
 	}
@@ -258,10 +258,9 @@ class PermissionService {
 			$new = array_diff($current, $composedOf);
 			$existing->Perms = $new;
 			$existing->write();
-			foreach ($composedOf as $remove) {
-				$key = $this->permCacheKey($node, $remove);
-				$this->getCache()->remove($key);
-			}
+			
+			$this->clearPermCacheFor($node);
+			
 			if (!count($new)) {
 				try {
 					$this->removeAuthority($node, $existing);
@@ -288,7 +287,7 @@ class PermissionService {
 		if (!$node) {
 			return false;
 		}
-
+		
 		if (!$member) {
 			$member = singleton('SecurityContext')->getMember();
 		}
@@ -300,41 +299,56 @@ class PermissionService {
 		if (Permission::check('ADMIN', 'any', $member)) {
 			return true;
 		}
+		
+		$permCache = $this->getCache();
+		/* @var $permCache Zend_Cache_Core */
+		$key = $this->permCacheKey($node, $perm);
+		$userGrants = null;
+		if ($key) {
+			$userGrants = $permCache->load($key);
+		} 
+		
+		if ($member && $userGrants && isset($userGrants[$perm][$member->ID])) {
+			return $userGrants[$perm][$member->ID];
+		} 
+
+		// okay, we need to build up all the info we have about the node for permissions
+		$s = $this->realiseAllSources($node);
+		
+		if (!$userGrants) {
+			$userGrants = array();
+		}
+		if (!isset($userGrants[$perm])) {
+			$userGrants[$perm] = array();
+		}
+		
+		$result = null;
 
 		// if no member, just check public view
 		$public = $this->checkPublicPerms($node, $perm);
 
 		if ($public) {
-			return true;
+			$result = true;
 		}
+		
+		// can return immediately
 		if (!$member) {
 			return false;
 		}
 
-		// see whether we're the owner, and if the perm we're checking is in that list
-		if ($this->checkOwnerPerms($node, $perm, $member)) {
-			return true;
+		if (is_null($result)) {
+			// see whether we're the owner, and if the perm we're checking is in that list
+			if ($this->checkOwnerPerms($node, $perm, $member)) {
+				$result = true;
+			}
 		}
-
-		$permCache = $this->getCache();
-		/* @var $permCache Zend_Cache_Core */
-
+		
 		$accessAuthority = '';
-
-		$key = $this->permCacheKey($node, $perm);
-		$userGrants = $permCache->load($key);
-
 		$directGrant = null;
-
-		if ($userGrants && isset($userGrants[$member->ID])) {
-			$directGrant = $userGrants[$member->ID];
-		} else {
-			$userGrants = array();
-		}
 
 		$can = false;
 
-		if (!$directGrant) {
+		if (is_null($result)) {
 			$filter = array(
 				'ItemID'		=> $node->ID,
 				'ItemType'		=> $node->class,
@@ -400,33 +414,39 @@ class PermissionService {
 					}
 				}
 			}
-
-			$userGrants[$member->ID] = $directGrant;
-			$permCache->save($userGrants, $key);
 		}
 
 		// return immediately if we have something
 		if ($directGrant === 'GRANT') {
-			return true;
+			$result = true;
 		}
 		if ($directGrant === 'DENY') {
-			return false;
+			$result = false;
 		}
 
 		// otherwise query our parents
-		if ($node->InheritPerms) {
-			$permParents = $this->getEffective('effectiveParents', $node);
+		if (is_null($result) && $node->InheritPerms) {
+			$permParents = $this->getEffectiveParents($node);
 			if (count($permParents) || $permParents instanceof IteratorAggregate) {
 				foreach ($permParents as $permParent) {
 					if ($permParent && $this->checkPerm($permParent, $perm, $member)) {
-						return true;
+						$result = true;
 					}
 				}
 			}
-			return false;
+			
 		}
 
-		return false;
+		if (is_null($result)) {
+			$result = false;
+		}
+
+		$userGrants[$perm][$member->ID] = $result;
+		if ($key) {
+			$permCache->save($userGrants, $key);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -440,62 +460,74 @@ class PermissionService {
 				return true;
 			}
 
-			if($node->InheritPerms){
-				$parent = $this->getEffective('effectiveParent', $node);
-				if ($parent) {
-					return $this->checkPublicPerms($parent, $perm);
+			if($node->InheritPerms) {
+				$permParents = $this->getEffectiveParents($node);
+				if (count($permParents) || $permParents instanceof IteratorAggregate) {
+					foreach ($permParents as $permParent) {
+						if ($permParent && $this->checkPublicPerms($permParent, $perm)) {
+							return true;
+						}
+					}
 				}
 			}
 		}
 		return false;
 	}
 	
-	public function getEffective($type, $node) {
-		$key = $type . '-' . get_class($node) . '-' . $node->ID;
+	public function getEffectiveParents($node) {
+		$key = get_class($node) . '-' . $node->ID;
 		if (isset($this->parents[$key])) {
 			return $this->parents[$key];
 		}
 		
 		// determine what we're looking up
-		if (method_exists($node, $type)) {
-			$this->parents[$key] = $node->$type();
+		if (method_exists($node, 'effectiveParents')) {
+			$this->parents[$key] = $node->effectiveParents();
 			return $this->parents[$key];
 		}
 		
+		if (method_exists($node, 'effectiveParent')) {
+			$this->parents[$key] = array($node->effectiveParent());
+			return $this->parents[$key];
+		}
+
 		// otherwise, put it together ourselves
+		$fullResult = null;
 		$result = null;
-		if ($type == 'effectiveParent') {
-			if (method_exists($node, 'permissionSource')) {
-				$result = $node->permissionSource();
-			} else {
-				$result = $this->parentFor($node);
-				if ($result && !$result->ID) {
-					$result = null;
-				}
-			}
+		if (method_exists($node, 'permissionSource')) {
+			$result = $node->permissionSource();
 		} else {
-			if (method_exists($node, 'permissionSources')) {
-				$result = $node->permissionSources();
-			} else {
-				$result = new ArrayObject();
-				
-				$parent = $this->parentFor($node);
-				if ($parent && $parent->ID) {
-					$result[] = $parent;
-				}
-				if (method_exists($node, 'permissionSource')) {
-					$parent = $node->permissionSource();
-					if ($parent) {
-						$result[] = $parent;
-					}
-				}
+			$result = $this->parentFor($node);
+			if ($result && !$result->ID) {
+				$result = null;
 			}
 		}
-		
-		if ($key && $node->ID) {
-			$this->parents[$key] = $result;
+		if ($result) {
+			$fullResult = array($result);
 		}
-		return $result;
+
+		if (method_exists($node, 'permissionSources')) {
+			$result = $node->permissionSources();
+			foreach ($result as $r) {
+				$fullResult[] = $r;
+			}
+		} 
+
+		if ($key && $node->ID) {
+			$this->parents[$key] = $fullResult;
+		}
+		return $fullResult;
+	}
+	
+	/**
+	 * @deprecated 
+	 * 
+	 * @param string $type
+	 * @param DataObject $node
+	 * @return array
+	 */
+	public function getEffective($type, $node) {
+		return $this->getEffectiveParents($node);
 	}
 	
 	protected function parentFor($node) {
@@ -593,13 +625,37 @@ class PermissionService {
 	 * @param DataObject $item
 	 * @param type $perm 
 	 */
-	public function clearPermCacheFor(DataObject $item, $perm) {
-		if (!$item) {
+	public function clearPermCacheFor($nodeStr) {
+		if (!$nodeStr) {
 			return;
 		}
-		if($key = $this->permCacheKey($item, $perm)){
-			// clear caching
-			$this->getCache()->remove($key);
+
+		if (is_object($nodeStr)) {
+			$nodeStr = $nodeStr->ClassName.'_'.$nodeStr->ID;
+		}
+
+		$key = $nodeStr;
+		$this->getCache()->remove($key);
+
+		$this->clearSourcesCache($nodeStr);
+	}
+	
+	protected function clearSourcesCache($nodeStr) {
+		$sourcesMap = $this->getCache()->load(self::SOURCES_MAP);
+		$kidsToClear = array();
+		if (isset($sourcesMap[$nodeStr])) {
+			// store and do _after_ the cache write below
+			$kidsToClear = $sourcesMap[$nodeStr];
+		}
+
+		unset($sourcesMap[$nodeStr]);
+		$this->getCache()->save($sourcesMap, self::SOURCES_MAP);
+
+		$key = "sources_$nodeStr";
+		$this->getCache()->remove($key);
+		
+		foreach ($kidsToClear as $keystr => $marker) {
+			$this->clearPermCacheFor($keystr);
 		}
 	}
 	
@@ -609,10 +665,51 @@ class PermissionService {
 	 * @param type $perm
 	 * @return string
 	 */
-	public function permCacheKey(DataObject $node, $perm) {
-		if($perm && $node){
-			return md5($perm . '-' . $node->ID . '-' . $node->class);
+	public function permCacheKey(DataObject $node) {
+		if($node && $node->ID){
+			return $node->class . '_' . $node->ID; //  . '-' . $node->class);
 		}
+	}
+	
+	/**
+	 * Realise all parent sources of the given node
+	 * 
+	 * @param DataObject $node
+	 * @param array $addTo
+	 */
+	public function realiseAllSources($node, $sourceTo = null, &$addTo = null) {
+		if (!$addTo) {
+			$addTo = array();
+		}
+		
+		$myIdent = $node->ClassName . "_" . $node->ID;
+		
+		// if needbe, update the source map
+		if ($sourceTo) {
+			$sourceMap = $this->getCache()->load(self::SOURCES_MAP);
+			if (!$sourceMap) {
+				$sourceMap = array();
+			}
+
+			$myTree = isset($sourceMap[$myIdent]) ? $sourceMap[$myIdent] : array();
+		
+			$myTree[$sourceTo] = 1;
+			$sourceMap[$myIdent] = $myTree;
+			$this->getCache()->save($sourceMap, self::SOURCES_MAP);
+		}
+
+		$parents = $this->getEffectiveParents($node);
+		if ($parents) {
+			foreach ($parents as $parent) {
+				$addTo[] = "{$parent->ClassName},$parent->ID";
+				$this->realiseAllSources($parent, $myIdent, $addTo);
+			}
+		}
+		
+		$key = "sources_{$node->ClassName}_$node->ID";
+		$this->getCache()->save($addTo, $key);
+		
+		return $addTo;
 	}
 }
 
