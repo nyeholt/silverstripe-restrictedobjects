@@ -138,6 +138,10 @@ class TestRestrictedObject extends SapphireTest {
 		
 		$user2 = $this->cache_generatedMembers['USERTWO'];
 		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
 		$item = array();
 		
 		$item[] = $o = new PrivateObject();
@@ -183,12 +187,12 @@ class TestRestrictedObject extends SapphireTest {
 		$item[2]->grant('Editor', $user2);
 		
 		// user1 can view all
-		foreach ($items as $i) {
+		foreach ($item as $i) {
 			$this->assertTrue($i->checkPerm('View', $user1));
-			$this->assertTrue($svc->checkRole($i, $role, $user1));
+			$this->assertTrue($svc->checkRole($i, 'Manager', $user1));
 		}
 		
-		$item->grant('Manager', $otherUser);
+//		$item->grant('Manager', $otherUser);
 	}
 	
 	function testOwnership() {

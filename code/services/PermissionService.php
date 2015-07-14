@@ -654,7 +654,7 @@ class PermissionService {
 		$key = "sources_$nodeStr";
 		$this->getCache()->remove($key);
 		
-		foreach ($kidsToClear as $keystr) {
+		foreach ($kidsToClear as $keystr => $marker) {
 			$this->clearPermCacheFor($keystr);
 		}
 	}
