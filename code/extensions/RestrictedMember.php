@@ -9,10 +9,10 @@
 class RestrictedMember extends DataExtension {
 	
 	public function memberAutoLoggedIn() {
-		$this->memberLoggedIn();
+		$this->beforeMemberLoggedIn();
 	}
 	
-	public function memberLoggedIn() {
+	public function beforeMemberLoggedIn() {
 		
 		singleton('SecurityContext')->setMember($this->owner);
 	}
