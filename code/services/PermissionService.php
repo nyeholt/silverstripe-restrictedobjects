@@ -184,9 +184,7 @@ class PermissionService {
 		$existing->Perms = $new;
 		$existing->write();
 
-		foreach ($new as $perm) {
-			$this->clearPermCacheFor($node, $perm);
-		}
+		$this->clearPermCacheFor($node);
 
 		return $existing;
 	}
