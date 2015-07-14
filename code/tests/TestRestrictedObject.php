@@ -158,20 +158,23 @@ class TestRestrictedObject extends SapphireTest {
 		$o->Title = 'Right branch';
 		$o->write();
 		
+		// 3
 		$item[] = $o = new PrivateObject();
 		$o->Title = 'Lgk1';
 		$o->ParentID = $item[1]->ID;
 		$o->write();
+		// 4
 		$item[] = $o = new PrivateObject();
 		$o->ParentID = $item[1]->ID;
 		$o->Title = 'Lgk2';
 		$o->write();
 		
-		
+		// 5
 		$item[] = $o = new PrivateObject();
 		$o->Title = 'Rgk1';
 		$o->ParentID = $item[2]->ID;
 		$o->write();
+		// 6
 		$item[] = $o = new PrivateObject();
 		$o->ParentID = $item[2]->ID;
 		$o->Title = 'Rgk2';
@@ -192,7 +195,34 @@ class TestRestrictedObject extends SapphireTest {
 			$this->assertTrue($svc->checkRole($i, 'Manager', $user1));
 		}
 		
-//		$item->grant('Manager', $otherUser);
+		// user2 not so much
+		$this->assertTrue($svc->checkPerm($item[5], 'View', $user2));
+		$this->assertTrue($svc->checkPerm($item[6], 'View', $user2));
+		$this->assertTrue($svc->checkRole($item[5], 'Editor', $user2));
+		$this->assertTrue($svc->checkRole($item[6], 'Editor', $user2));
+		
+		$this->assertFalse($item[0]->checkPerm('View', $user2));
+		$this->assertFalse($item[3]->checkPerm('View', $user2));
+		$this->assertFalse($item[4]->checkPerm('View', $user2));
+		
+		$svc->removePermissions($item[2], 'Editor', $user2);
+		
+		$this->assertFalse($svc->checkPerm($item[5], 'View', $user2));
+		$this->assertFalse($svc->checkPerm($item[6], 'View', $user2));
+		
+		$item[0]->grant('Editor', $user2);
+		
+		// re-affirm 'can'
+		$this->assertTrue($svc->checkPerm($item[5], 'View', $user2));
+		
+		$this->assertTrue($svc->checkPerm($item[4], 'View', $user2));
+		$this->assertTrue($svc->checkPerm($item[3], 'View', $user2));
+		$this->assertTrue($svc->checkPerm($item[1], 'View', $user2));
+		
+		// now try deny in between
+		$item[1]->deny('View', $user2);
+		$this->assertFalse($item[3]->checkPerm('View', $user2));
+		$this->assertFalse($item[4]->checkPerm('View', $user2));
 	}
 	
 	function testOwnership() {
