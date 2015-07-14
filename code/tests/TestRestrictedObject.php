@@ -116,6 +116,81 @@ class TestRestrictedObject extends SapphireTest {
 		$this->assertFalse($item->checkPerm('Publish'));
 	}
 	
+	public function testInheritedPermissions() {
+		$svc = singleton('PermissionService');
+		/* @var $svc PermissionService */
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$user = $this->cache_generatedMembers['ADMIN'];
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('USERONE');
+		Restrictable::set_enabled(true);
+		
+		$user1 = $this->cache_generatedMembers['USERONE'];
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('USERTWO');
+		Restrictable::set_enabled(true);
+		
+		$user2 = $this->cache_generatedMembers['USERTWO'];
+		
+		$item = array();
+		
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Treetop';
+		$o->write();
+		
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Left branch';
+		$o->ParentID = $item[0]->ID;
+		$o->write();
+		
+		$item[] = $o = new PrivateObject();
+		$o->ParentID = $item[0]->ID;
+		$o->Title = 'Right branch';
+		$o->write();
+		
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Lgk1';
+		$o->ParentID = $item[1]->ID;
+		$o->write();
+		$item[] = $o = new PrivateObject();
+		$o->ParentID = $item[1]->ID;
+		$o->Title = 'Lgk2';
+		$o->write();
+		
+		
+		$item[] = $o = new PrivateObject();
+		$o->Title = 'Rgk1';
+		$o->ParentID = $item[2]->ID;
+		$o->write();
+		$item[] = $o = new PrivateObject();
+		$o->ParentID = $item[2]->ID;
+		$o->Title = 'Rgk2';
+		$o->write();
+		
+		$this->assertFalse($item[0]->checkPerm('View', $user1));
+		$this->assertFalse($item[0]->checkPerm('View', $user2));
+		
+		$this->assertFalse($o->checkPerm('View', $user1));
+		$this->assertFalse($o->checkPerm('View', $user2));
+		
+		$item[0]->grant('Manager', $user1);
+		$item[2]->grant('Editor', $user2);
+		
+		// user1 can view all
+		foreach ($items as $i) {
+			$this->assertTrue($i->checkPerm('View', $user1));
+			$this->assertTrue($svc->checkRole($i, $role, $user1));
+		}
+		
+		$item->grant('Manager', $otherUser);
+	}
+	
 	function testOwnership() {
 		Restrictable::set_enabled(false);
 		$this->logInWithPermission('OTHERUSER');

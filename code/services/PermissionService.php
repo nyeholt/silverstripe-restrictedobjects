@@ -306,9 +306,7 @@ class PermissionService {
 		$userGrants = null;
 		if ($key) {
 			$userGrants = $permCache->load($key);
-		} else {
-			$o = 0;
-		}
+		} 
 		
 		if ($member && $userGrants && isset($userGrants[$perm][$member->ID])) {
 			return $userGrants[$perm][$member->ID];
@@ -444,7 +442,9 @@ class PermissionService {
 		}
 
 		$userGrants[$perm][$member->ID] = $result;
-		$permCache->save($userGrants, $key);
+		if ($key) {
+			$permCache->save($userGrants, $key);
+		}
 
 		return $result;
 	}

@@ -287,7 +287,7 @@ class Restrictable extends DataExtension {
 					// ignore any changed fields setting for this field
 					unset($changed['OwnerID']);
 					
-					// if this is a new node, and its parents didn't fail
+					// if this is a new node, and its parents didn't fail (ie $newNodeParentsCan wasn't evaluated)
 					if (!$newNodeParentsCan) {
 						$allowWrite = true;
 					}
