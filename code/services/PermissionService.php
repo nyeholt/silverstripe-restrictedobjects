@@ -45,7 +45,10 @@ class PermissionService {
 	 */
 	public function getCache() {
 		if (!$this->cache) {
-			$this->cache = SS_Cache::factory('restricted_perms', 'Output', array('automatic_serialization' => true));
+			$this->cache = SS_Cache::factory('restricted_perms', 'Output', array(
+				'automatic_serialization' => true,
+				'automatic_cleaning_factor'		=> 0,			// no need for cleaning, re-uses the same keys
+			));
 		}
 		return $this->cache;
 	}
