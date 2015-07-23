@@ -9,3 +9,7 @@ Injector:
   RestrictedMember: 
     properties: 
       securityContext: %$SecurityContext
+  RequestProcessor:
+    properties:
+      filters: 
+        - %$MemberLoginFilter
