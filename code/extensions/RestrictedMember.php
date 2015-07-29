@@ -16,4 +16,11 @@ class RestrictedMember extends DataExtension {
 		
 		singleton('SecurityContext')->setMember($this->owner);
 	}
+	
+	public function updateEffectiveParents(&$parents) {
+		$groups = $this->owner->Groups();
+		foreach ($groups as $g) {
+			$parents[] = $g;
+		}
+	}
 }

@@ -516,6 +516,8 @@ class PermissionService {
 			}
 		} 
 
+		$node->extend('updateEffectiveParents', $fullResult);
+		
 		if ($key && $node->ID) {
 			$this->parents[$key] = $fullResult;
 		}
