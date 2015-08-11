@@ -6,6 +6,10 @@
 class BasicAuthEnablerExtension extends Extension {
 	static $do_reenable = false;
 	
+	public function onBeforeSecurityLogin() {
+		$this->onBeforeInit();
+	}
+	
 	public function onBeforeInit() {
 		// see if we have a requirement for basic auth. If so, and there's no current user, we should disable
 		// restrictions on member objects as it will break the login process. Can re-enable afterwards
