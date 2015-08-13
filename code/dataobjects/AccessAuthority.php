@@ -48,7 +48,7 @@ class AccessAuthority extends DataObject {
 	}
 	
 	public function onAfterDelete() {
-		parent::onBeforeDelete();
+		parent::onAfterDelete();
 		
 		if($values = $this->Perms->getValues()){
 			foreach ($values as $perm) {
