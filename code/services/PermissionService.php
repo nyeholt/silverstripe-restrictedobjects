@@ -365,7 +365,7 @@ class PermissionService {
 				$groups = $member ? $member->Groups() : array();
 				$gids = array();
 				if ($groups && $groups->Count()) {
-					$gids = $groups->map('ID', 'ID');
+					$gids = $groups->map('ID', 'ID')->toArray();
 				}
 				$this->groups[$member->ID] = $gids;
 			}
@@ -383,11 +383,11 @@ class PermissionService {
 					}
 
 					$grant = null;
-					if ($access->Type == 'Group') {
+					if (is_a($access->Type, 'Group', true)) {
 						if (isset($gids[$access->AuthorityID])) {
 							$grant = $access->Grant;
 						}
-					} else if ($access->Type == 'Member') {
+					} else if (is_a($access->Type, 'Member', true)) {
 						if ($member->ID == $access->AuthorityID) {
 							$grant = $access->Grant;
 						}
