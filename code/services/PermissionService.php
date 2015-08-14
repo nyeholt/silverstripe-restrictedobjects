@@ -11,6 +11,8 @@ class PermissionService {
 	
 	const SOURCES_MAP = 'sources_map';
 	
+	const ITEM_PREFIX = 'perm_';
+	
 	public function __construct() {
 	}
 	
@@ -495,7 +497,7 @@ class PermissionService {
 		}
 
 		// otherwise, put it together ourselves
-		$fullResult = null;
+		$fullResult = array();
 		$result = null;
 		if (method_exists($node, 'permissionSource')) {
 			$result = $node->permissionSource();
@@ -639,10 +641,60 @@ class PermissionService {
 			$nodeStr = $nodeStr->ClassName.'_'.$nodeStr->ID;
 		}
 
-		$key = $nodeStr;
+		$key = self::ITEM_PREFIX . $nodeStr;
 		$this->getCache()->remove($key);
 
 		$this->clearSourcesCache($nodeStr);
+	}
+	
+	/**
+	 * Clear all cached permissions for the given user
+	 * 
+	 * @param int $userId
+	 */
+	public function clearUserCachedPerms($userId) {
+		$cache = $this->getCache();
+		
+		$ids = $cache->getIds();
+		foreach ($ids as $id) {
+			// get the item, see if it has the user ID
+			if ($id == self::SOURCES_MAP || strpos($id, 'source_') !== false || strpos($id, self::ITEM_PREFIX) === false) {
+				continue;
+			}
+
+			$userPerms = $cache->load($id);
+			if (is_array($userPerms)) {
+				$changed = false;
+				foreach ($userPerms as $type => $grantedUserIds) {
+					$newIds = array();
+					foreach ($grantedUserIds as $grantedUserId => $grant) {
+						if ($userId != $grantedUserId) {
+							$newIds[] = $grantedUserId;
+						}
+					}
+					if (count($newIds) != count($userPerms[$type])) {
+						$userPerms[$type] = $newIds;
+						$changed = true;
+					}
+				}
+				if ($changed) {
+					$cache->save($userPerms, $id);
+				}
+			}
+		}
+	}
+	
+	public function purgePermissionCache() {
+		$cache = $this->getCache();
+		
+		$ids = $cache->getIds();
+		foreach ($ids as $id) {
+			// get the item, see if it has the user ID
+			if ($id == self::SOURCES_MAP || strpos($id, 'source_') !== false || strpos($id, self::ITEM_PREFIX) === false) {
+				continue;
+			}
+			$cache->remove($id);
+		}
 	}
 	
 	protected function clearSourcesCache($nodeStr) {
@@ -672,12 +724,27 @@ class PermissionService {
 	 */
 	public function permCacheKey(DataObject $node) {
 		if($node && $node->ID){
-			return $node->class . '_' . $node->ID; //  . '-' . $node->class);
+			return self::ITEM_PREFIX . $node->class . '_' . $node->ID; //  . '-' . $node->class);
 		}
 	}
 	
 	/**
 	 * Realise all parent sources of the given node
+	 * 
+	 * This causes two things to be generated and stored 
+	 * 
+	 * - the list of nodes that $node derives inherited permissions from, 
+	 *   indexed as source_nodeType_nodeID . This includes all generational ancestors,
+	 *   not just immediate parents
+	 * 
+	 * - A graph of all the nodes that an item provides inherited permissions
+	 *   to. 
+	 * 
+	 * 
+	 * This allows us to provide more intelligent cache purging whenever nodes change, 
+	 * so that the runtime permission cache can directly store the 'realised' permission
+	 * of things. 
+	 * 
 	 * 
 	 * @param DataObject $node
 	 * @param array $addTo
@@ -711,7 +778,7 @@ class PermissionService {
 			}
 		}
 		
-		$key = "sources_{$node->ClassName}_$node->ID";
+		$key = "sources_$myIdent";
 		$this->getCache()->save($addTo, $key);
 		
 		return $addTo;

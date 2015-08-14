@@ -5,6 +5,10 @@ DataList:
   extensions:
     - RestrictedDataList
 
+Group:
+  extensions:
+    - RestrictedGroupExtension
+
 Injector:
   RestrictedMember: 
     properties: 

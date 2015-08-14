@@ -16,6 +16,8 @@ class TestRestrictedObject extends SapphireTest {
 		parent::setUpOnce();
 		Restrictable::set_enabled(false);
 		
+		BasicAuth::protect_entire_site(false);
+		
 		// needs to be done this way to work around SS bug
 //		include_once dirname(dirname(__FILE__)).'/extensions/Restrictable.php';
 //		Object::add_extension('PrivateObject', 'Restrictable');
@@ -349,6 +351,76 @@ class TestRestrictedObject extends SapphireTest {
 		$can = $item->checkPerm('View');
 		$this->assertTrue($can);
 		
+	}
+	
+	public function testGroupInheritedPermission() {
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$user = $this->cache_generatedMembers['ADMIN'];
+		$item = new PrivateObject();
+		$item->Title = 'testagain item';
+		$item->write();
+
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('OTHERUSER');
+		Restrictable::set_enabled(true);
+		
+		$otherUser = $this->cache_generatedMembers['OTHERUSER'];
+		
+		$can = $item->checkPerm('View');
+		$this->assertFalse($can);
+		
+		Restrictable::set_enabled(false);
+		$this->logInWithPermission('ADMIN');
+		Restrictable::set_enabled(true);
+		
+		$group1 = Group::create(array(
+			'Title'		=> 'Group1'
+		));
+		$group1->write();
+		
+		$group2 = Group::create(array(
+			'Title'		=> 'Group2',
+			'ParentID'	=> $group1->ID,
+		));
+		$group2->write();
+		
+		// grant to group 1
+		$item->grant('View', $group1);
+
+		$otherUser->Groups()->add($group1); $otherUser->write();
+		singleton('PermissionService')->flushCache();
+		
+		
+		$can = $item->checkPerm('View', $otherUser);
+		
+		$this->assertTrue($can);
+		
+		
+		// remove the user
+		$otherUser->Groups()->remove($group1); $otherUser->write();
+		singleton('PermissionService')->flushCache();
+		
+		$can = $item->checkPerm('View', $otherUser);
+		
+		$this->assertFalse($can);
+		
+		$otherUser->Groups()->add($group2); $otherUser->write();
+		singleton('PermissionService')->flushCache();
+		
+		$can = $item->checkPerm('View', $otherUser);
+		$this->assertTrue($can);
+		
+		$group2->ParentID = 0;
+		$group2->write();
+		singleton('PermissionService')->flushCache();
+		
+		$can = $item->checkPerm('View', $otherUser);
+		$this->assertFalse($can);
 	}
 }
 

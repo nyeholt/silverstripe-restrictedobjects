@@ -134,4 +134,37 @@ permissions you check for in `$obj->checkPerm('CustomPerm');`
 See the (wiki)[https://github.com/nyeholt/silverstripe-restrictedobjects/wiki]
 for more.
 
+## Inherited permissions
+
+Rather than just providing permission inheritance via a ParentID lookup, in
+some cases that there may be situations where there are multiple objects that
+would be considered a 'parent' for permission determination. To support this,
+the permission lookup mechanism allows developers to define a few mechanisms
+for providing this inherited source object
+
+On a data object directly 
+
+* The method `effectiveParents()` that can return an SS_List of parent objects
+* The method `effectiveParent()` that can return a data object directly
+
+Via an Extension subclass
+
+* `updateEffectiveParents(&$parentNodes)` which can add additional nodes
+  onto the effective parents list
+
+
+## Permission caching
+
+All permissions are cached immediately after lookup, including the result of 
+any inherited permissions, meaning that subsequent data changes may
+change this inheritance structure. To work around this, the system also caches
+some key data relationships, namely
+
+* the list of nodes that $node derives inherited permissions from, indexed as 
+  source_nodeType_nodeID . This includes all generational ancestors, not just 
+  immediate parents
+* A graph of all the nodes that an item provides inherited permissions to. 
+
+Thus following a change to any node in the hierarchy, the cached data for 
+any dependent node can be immediately purged.
 
