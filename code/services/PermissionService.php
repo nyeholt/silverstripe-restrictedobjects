@@ -338,7 +338,7 @@ class PermissionService {
 		
 		// can return immediately
 		if (!$member) {
-			return false;
+			return $result;
 		}
 
 		if (is_null($result)) {
