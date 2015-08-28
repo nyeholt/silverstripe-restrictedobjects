@@ -638,13 +638,17 @@ class PermissionService {
 		}
 
 		if (is_object($nodeStr)) {
-			$nodeStr = $nodeStr->ClassName.'_'.$nodeStr->ID;
+			$nodeStr = $this->idStr($nodeStr);
 		}
 
 		$key = self::ITEM_PREFIX . $nodeStr;
 		$this->getCache()->remove($key);
 
 		$this->clearSourcesCache($nodeStr);
+	}
+	
+	public function idStr($node) {
+		return str_replace("\\", '_', $nodeStr->ClassName.'_'.$nodeStr->ID);
 	}
 	
 	/**
@@ -754,7 +758,7 @@ class PermissionService {
 			$addTo = array();
 		}
 		
-		$myIdent = $node->ClassName . "_" . $node->ID;
+		$myIdent = $this->idStr($node);
 		
 		// if needbe, update the source map
 		if ($sourceTo) {
