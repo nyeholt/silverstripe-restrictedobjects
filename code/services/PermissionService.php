@@ -648,7 +648,7 @@ class PermissionService {
 	}
 	
 	public function idStr($node) {
-		return str_replace("\\", '_', $nodeStr->ClassName.'_'.$nodeStr->ID);
+		return str_replace("\\", '_', $node->ClassName.'_'.$node->ID);
 	}
 	
 	/**
