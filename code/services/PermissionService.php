@@ -728,7 +728,7 @@ class PermissionService {
 	 */
 	public function permCacheKey(DataObject $node) {
 		if($node && $node->ID){
-			return self::ITEM_PREFIX . $node->class . '_' . $node->ID; //  . '-' . $node->class);
+			return self::ITEM_PREFIX . $this->idStr($node); 
 		}
 	}
 	
