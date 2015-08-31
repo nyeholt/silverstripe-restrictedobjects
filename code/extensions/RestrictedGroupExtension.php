@@ -10,15 +10,17 @@
 class RestrictedGroupExtension extends DataExtension {
 	public function updateCMSFields(FieldList $fields) {
 		$grid = $fields->dataFieldByName('Members');
+		if ($grid) {
+			$grid->getConfig()->removeComponentsByType('GridFieldDeleteAction');
+			$grid->getConfig()->addComponent(new MemberGroupDeleteAction(true));
+		}
 		
-		$grid->getConfig()->removeComponentsByType('GridFieldDeleteAction');
-		$grid->getConfig()->addComponent(new MemberGroupDeleteAction(true));
 	}
 	
 	public function onBeforeWrite() {
 		// if we're moving groups around, we need to just get rid of all cached stuff, as
 		// it's too expensive to try and figure out what is what. 
-		if ($this->owner->isChanged('ParentID')) {
+		if ($this->owner->ID && $this->owner->isChanged('ParentID')) {
 			singleton('PermissionService')->purgePermissionCache();
 		}
 	}
