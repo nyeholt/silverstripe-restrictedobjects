@@ -311,6 +311,9 @@ class PermissionService {
 		$userGrants = null;
 		if ($key) {
 			$userGrants = $permCache->load($key);
+			if (count($userGrants)) {
+				$userGrants = $this->sanitiseCacheData($userGrants);
+			}
 		} 
 		
 		if ($member && $userGrants && isset($userGrants[$perm][$member->ID])) {
@@ -452,6 +455,20 @@ class PermissionService {
 		}
 
 		return $result;
+	}
+	
+	protected function sanitiseCacheData($allGrants) {
+		$sanitised = array();
+		foreach ($allGrants as $perm => $granted) {
+			$sanitised[$perm] = array();
+			foreach ($granted as $memberId => $grant) {
+				if (is_bool($grant)) {
+					$sanitised[$perm][$memberId] = $grant;
+				} 
+			}
+		}
+
+		return $sanitised;
 	}
 
 	/**
@@ -673,7 +690,7 @@ class PermissionService {
 					$newIds = array();
 					foreach ($grantedUserIds as $grantedUserId => $grant) {
 						if ($userId != $grantedUserId) {
-							$newIds[] = $grantedUserId;
+							$newIds[$grantedUserId] = $grant;
 						}
 					}
 					if (count($newIds) != count($userPerms[$type])) {
