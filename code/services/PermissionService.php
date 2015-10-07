@@ -459,8 +459,14 @@ class PermissionService {
 	
 	protected function sanitiseCacheData($allGrants) {
 		$sanitised = array();
+		if (!is_array($allGrants)) {
+			return $sanitised;
+		}
 		foreach ($allGrants as $perm => $granted) {
 			$sanitised[$perm] = array();
+			if (!is_array($granted)) {
+				continue;
+			}
 			foreach ($granted as $memberId => $grant) {
 				if (is_bool($grant)) {
 					$sanitised[$perm][$memberId] = $grant;
