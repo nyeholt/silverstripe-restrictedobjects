@@ -388,18 +388,18 @@ class PermissionService {
 					}
 
 					$grant = null;
-					if (is_a($access->Type, 'Group', true)) {
+					$authority = $access->getAuthority();
+					if ($authority instanceof Group) {
 						if (isset($gids[$access->AuthorityID])) {
 							$grant = $access->Grant;
 						}
-					} else if (is_a($access->Type, 'Member', true)) {
+					} else if ($authority instanceof Member) {
 						if ($member->ID == $access->AuthorityID) {
 							$grant = $access->Grant;
 						}
 					} else {
 						// another mechanism that will require a lookup of members in a list
 						// TODO cache this
-						$authority = $access->getAuthority();
 						if ($authority instanceof ListOfMembers) {
 							$listMembers = $authority->getAllMembers()->map('ID', 'Title');
 							if (isset($listMembers[$member->ID])) {
