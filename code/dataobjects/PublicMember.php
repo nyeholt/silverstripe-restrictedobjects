@@ -14,17 +14,20 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class PublicMember extends Member {
-	
-	public function __construct($record = null, $isSingleton = false) {
-		parent::__construct($record, $isSingleton);
-		
-		// we're explicitly setting our ID to -1. This is detected by the
-		// permission service management code for public permission application
-		$this->ID = -1;
-	}
-	
-	public function write() {
-		throw new Exception("Cannot save public member");
-	}
+class PublicMember extends Member
+{
+    
+    public function __construct($record = null, $isSingleton = false)
+    {
+        parent::__construct($record, $isSingleton);
+        
+        // we're explicitly setting our ID to -1. This is detected by the
+        // permission service management code for public permission application
+        $this->ID = -1;
+    }
+    
+    public function write()
+    {
+        throw new Exception("Cannot save public member");
+    }
 }

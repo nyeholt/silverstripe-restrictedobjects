@@ -9,8 +9,9 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class RestrictedObject extends DataObject {
-	private static $extensions = array(
-		'Restrictable',
-	);
+class RestrictedObject extends DataObject
+{
+    private static $extensions = array(
+        'Restrictable',
+    );
 }

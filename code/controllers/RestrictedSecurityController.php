@@ -7,20 +7,24 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class RestrictedSecurityController extends Security {
-	
-	public function index($redirect = true) {
-		Restrictable::set_enabled(false);
-		$member = Member::currentUser();
-		Restrictable::set_enabled(true);
+class RestrictedSecurityController extends Security
+{
+    
+    public function index($redirect = true)
+    {
+        Restrictable::set_enabled(false);
+        $member = Member::currentUser();
+        Restrictable::set_enabled(true);
 
-		if($member) {
-			// run the logout as an admin so we can update the user object
-			singleton('TransactionManager')->run(array($member, 'logOut'), Security::findAnAdministrator());
-		}
+        if ($member) {
+            // run the logout as an admin so we can update the user object
+            singleton('TransactionManager')->run(array($member, 'logOut'), Security::findAnAdministrator());
+        }
 
-		if($redirect) $this->redirectBack();
+        if ($redirect) {
+            $this->redirectBack();
+        }
 
-		return '';
-	}
+        return '';
+    }
 }

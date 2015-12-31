@@ -6,322 +6,339 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class Restrictable extends DataExtension {
+class Restrictable extends DataExtension
+{
 
-	/**
-	 * @var boolean
-	 */
-	protected static $enabled = true;
-	
-	private static $db = array(
-		'InheritPerms' => 'Boolean',
-		'PublicAccess' => 'Boolean',
-	);
-	
-	private static $has_one = array(
-		'Owner' => 'Member',
-	);
-	
-	private static $defaults = array(
-		'InheritPerms' => true,
-	);
+    /**
+     * @var boolean
+     */
+    protected static $enabled = true;
+    
+    private static $db = array(
+        'InheritPerms' => 'Boolean',
+        'PublicAccess' => 'Boolean',
+    );
+    
+    private static $has_one = array(
+        'Owner' => 'Member',
+    );
+    
+    private static $defaults = array(
+        'InheritPerms' => true,
+    );
 
-	public static function get_enabled() {
-		return self::$enabled;
-	}
-	
-	public static function set_enabled($v = true) {
-		$prev = self::$enabled;
-		self::$enabled = $v;
-		return $prev;
-	}
+    public static function get_enabled()
+    {
+        return self::$enabled;
+    }
+    
+    public static function set_enabled($v = true)
+    {
+        $prev = self::$enabled;
+        self::$enabled = $v;
+        return $prev;
+    }
 
-	public function getAuthorities() {
-		$filter = '"ItemID" = ' . ((int) $this->owner->ID) . ' AND "ItemType" = \'' . Convert::raw2sql($this->owner->class) . '\'';
-		$items = DataObject::get('AccessAuthority', $filter);
-		return $items;
-	}
+    public function getAuthorities()
+    {
+        $filter = '"ItemID" = ' . ((int) $this->owner->ID) . ' AND "ItemType" = \'' . Convert::raw2sql($this->owner->class) . '\'';
+        $items = DataObject::get('AccessAuthority', $filter);
+        return $items;
+    }
 
-	/**
-	 * Grants a specific permission to a given user or group
-	 *
-	 * @param string $perm
-	 * @param Member|Group $to
-	 */
-	public function grant($perm, DataObject $to, $grant = 'GRANT') {
-		return singleton('PermissionService')->grant($this->owner, $perm, $to, $grant);
-	}
+    /**
+     * Grants a specific permission to a given user or group
+     *
+     * @param string $perm
+     * @param Member|Group $to
+     */
+    public function grant($perm, DataObject $to, $grant = 'GRANT')
+    {
+        return singleton('PermissionService')->grant($this->owner, $perm, $to, $grant);
+    }
 
-	/**
-	 * Deny access to a data object to a particular group/user
-	 *
-	 * @param string $perm
-	 * @param Member $to
-	 * @return 
-	 */
-	public function deny($perm, $to) {
-		return $this->grant($perm, $to, 'DENY');
-	}
+    /**
+     * Deny access to a data object to a particular group/user
+     *
+     * @param string $perm
+     * @param Member $to
+     * @return 
+     */
+    public function deny($perm, $to)
+    {
+        return $this->grant($perm, $to, 'DENY');
+    }
 
 
-	/**
-	 * Return true or false as to whether a given user can access an object
-	 * 
-	 * @param type $perm
-	 * @param type $member
-	 * @param type $alsoFor
-	 * @return type 
-	 */
-	public function checkPerm($perm, $member=null) {
-		return singleton('PermissionService')->checkPerm($this->owner, $perm, $member);
-	}
+    /**
+     * Return true or false as to whether a given user can access an object
+     * 
+     * @param type $perm
+     * @param type $member
+     * @param type $alsoFor
+     * @return type 
+     */
+    public function checkPerm($perm, $member=null)
+    {
+        return singleton('PermissionService')->checkPerm($this->owner, $perm, $member);
+    }
 
-	/**
-	 * Allow users to specify an array of field level permission requirements on a content
-	 * object that will be checked when editing items. 
-	 * 
-	 * This should return an array (
-	 * 		'FieldName'		=> 'RequiredPermission',
-	 * )
-	 * 
-	 * Typically this is called directly in the extension so that OwnerID is always specified. 
-	 * 
-	 */
-	public function fieldPermissions() {
-		// so we can pass around by ref and not worry about end users NOT
-		// using &$fields in their code...
-		$fieldPerms = new ArrayObject();
+    /**
+     * Allow users to specify an array of field level permission requirements on a content
+     * object that will be checked when editing items. 
+     * 
+     * This should return an array (
+     * 		'FieldName'		=> 'RequiredPermission',
+     * )
+     * 
+     * Typically this is called directly in the extension so that OwnerID is always specified. 
+     * 
+     */
+    public function fieldPermissions()
+    {
+        // so we can pass around by ref and not worry about end users NOT
+        // using &$fields in their code...
+        $fieldPerms = new ArrayObject();
 
-		if (method_exists($this->owner, 'fieldPermissions')) {
-			$fieldPerms = $this->owner->fieldPermissions();
-			if (!is_array($fieldPerms)) {
-				// force it to be an array
-				$fieldPerms = new ArrayObject();
-			}
-		}
+        if (method_exists($this->owner, 'fieldPermissions')) {
+            $fieldPerms = $this->owner->fieldPermissions();
+            if (!is_array($fieldPerms)) {
+                // force it to be an array
+                $fieldPerms = new ArrayObject();
+            }
+        }
 
-		$fieldPerms['OwnerID'] = 'TakeOwnership';
-		$this->owner->extend('updateFieldPermissions', $fieldPerms);
+        $fieldPerms['OwnerID'] = 'TakeOwnership';
+        $this->owner->extend('updateFieldPermissions', $fieldPerms);
 
-		return $fieldPerms;
-	}
+        return $fieldPerms;
+    }
 
-	/**
-	 * Check for a View permission only if the item exists in the DB
-	 * @param type $member
-	 * @return type 
-	 */
-	public function canView($member=null) {
-		if (self::$enabled) {
-			// see if we're on a page, and its ID is -1, which is always vieable
-			if ($this->owner->ID === -1) {
-				return true;
-			}
-			$res = $this->checkPerm('View', $member);
-			return $res;
-		}
-	}
+    /**
+     * Check for a View permission only if the item exists in the DB
+     * @param type $member
+     * @return type 
+     */
+    public function canView($member=null)
+    {
+        if (self::$enabled) {
+            // see if we're on a page, and its ID is -1, which is always vieable
+            if ($this->owner->ID === -1) {
+                return true;
+            }
+            $res = $this->checkPerm('View', $member);
+            return $res;
+        }
+    }
 
-	public function canEdit($member=null) {
-		if (self::$enabled) {
-			$res = $this->checkPerm('Write', $member);
-			return $res;
-		}
-	}
+    public function canEdit($member=null)
+    {
+        if (self::$enabled) {
+            $res = $this->checkPerm('Write', $member);
+            return $res;
+        }
+    }
 
-	public function canDelete($member=null) {
-		if (self::$enabled) {
-			$res = $this->checkPerm('Delete', $member);
-			return $res;
-		}
-	}
+    public function canDelete($member=null)
+    {
+        if (self::$enabled) {
+            $res = $this->checkPerm('Delete', $member);
+            return $res;
+        }
+    }
 
-	public function canPublish($member=null) {
-		if (self::$enabled) {
-			$res = $this->checkPerm('Publish', $member);
-			return $res;
-		}
-	}
-	
-	public function updateCMSFields(\FieldList $fields) {
-		if ($this->owner instanceof SiteTree) {
-			return;
-		}
-		return $this->updateSettingsFields($fields);
-	}
+    public function canPublish($member=null)
+    {
+        if (self::$enabled) {
+            $res = $this->checkPerm('Publish', $member);
+            return $res;
+        }
+    }
+    
+    public function updateCMSFields(\FieldList $fields)
+    {
+        if ($this->owner instanceof SiteTree) {
+            return;
+        }
+        return $this->updateSettingsFields($fields);
+    }
 
-	public function updateSettingsFields(\FieldList $fields) {
-		// $controller, $name, $sourceClass, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = "", $sourceJoin = ""
-		$fieldPerms = $this->fieldPermissions();
+    public function updateSettingsFields(\FieldList $fields)
+    {
+        // $controller, $name, $sourceClass, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = "", $sourceJoin = ""
+        $fieldPerms = $this->fieldPermissions();
 
-		// first, make a field readonly if there's no permission to edit it
-		foreach ($fieldPerms as $fieldId => $permission) {
-			if (!$this->checkPerm($permission)) {
-				// convert to a readonly field
-				$hasField = $fields->dataFieldByName($fieldId);
-				if ($hasField) {
-					$fields->makeFieldReadonly($fieldId);
-				}
-			}
-		}
+        // first, make a field readonly if there's no permission to edit it
+        foreach ($fieldPerms as $fieldId => $permission) {
+            if (!$this->checkPerm($permission)) {
+                // convert to a readonly field
+                $hasField = $fields->dataFieldByName($fieldId);
+                if ($hasField) {
+                    $fields->makeFieldReadonly($fieldId);
+                }
+            }
+        }
 
-		if ($this->owner->checkPerm('ViewPermissions')) {
-			$listField = null;
-			
-			if ($this->owner->ID) {
-				$accessList = DataList::create('AccessAuthority')->filter(array('ItemID' => $this->owner->ID, 'ItemType' => $this->owner->class));
-				$listField = GridField::create(
-					'AccessAuthority',
-					false,
-					$accessList,
-					$fieldConfig = GridFieldConfig_RecordEditor::create(20)
-				);
+        if ($this->owner->checkPerm('ViewPermissions')) {
+            $listField = null;
+            
+            if ($this->owner->ID) {
+                $accessList = DataList::create('AccessAuthority')->filter(array('ItemID' => $this->owner->ID, 'ItemType' => $this->owner->class));
+                $listField = GridField::create(
+                    'AccessAuthority',
+                    false,
+                    $accessList,
+                    $fieldConfig = GridFieldConfig_RecordEditor::create(20)
+                );
 
-				$fieldConfig->removeComponentsByType('GridFieldEditButton');
+                $fieldConfig->removeComponentsByType('GridFieldEditButton');
 
-				// AccessAuthorityGridFieldDetailForm_ItemRequest
-				$detailForm = $fieldConfig->getComponentByType('GridFieldDetailForm');
-				$detailForm->setItemRequestClass('AccessAuthorityGridFieldDetailForm_ItemRequest');
-				$listField->forObject = $this->owner;
-			}
+                // AccessAuthorityGridFieldDetailForm_ItemRequest
+                $detailForm = $fieldConfig->getComponentByType('GridFieldDetailForm');
+                $detailForm->setItemRequestClass('AccessAuthorityGridFieldDetailForm_ItemRequest');
+                $listField->forObject = $this->owner;
+            }
 
-			$perms = array('show');
-			
-			$rootTab = $fields->fieldByName('Root');
-			$fileRootTab = $fields->fieldByName('BottomRoot');
-			$addTo = null;
-			if ($rootTab) {
-				$addTo = $fields->findOrMakeTab('Root.Permissions');
-			} else if ($fileRootTab) {
-				$addTo = $fields->findOrMakeTab('BottomRoot.Permissions');
-			}
-			// only add if we have a CMS backend!
-			if ($addTo) {
-				if ($this->owner->checkPerm('ChangePermissions')) {
-					$perms[] = 'add';
-					$addTo->push(new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions')));
-					$addTo->push(new CheckboxField('PublicAccess', _t('Restrictable.PUBLIC_ACCESS', 'Publicly Accessible')));
-				}
+            $perms = array('show');
+            
+            $rootTab = $fields->fieldByName('Root');
+            $fileRootTab = $fields->fieldByName('BottomRoot');
+            $addTo = null;
+            if ($rootTab) {
+                $addTo = $fields->findOrMakeTab('Root.Permissions');
+            } elseif ($fileRootTab) {
+                $addTo = $fields->findOrMakeTab('BottomRoot.Permissions');
+            }
+            // only add if we have a CMS backend!
+            if ($addTo) {
+                if ($this->owner->checkPerm('ChangePermissions')) {
+                    $perms[] = 'add';
+                    $addTo->push(new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions')));
+                    $addTo->push(new CheckboxField('PublicAccess', _t('Restrictable.PUBLIC_ACCESS', 'Publicly Accessible')));
+                }
 
-				if ($this->checkPerm('TakeOwnership')) {
-					$df = DropdownField::create('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title'));
-					$df->setEmptyString(_t('RestrictedObjects.CHOOSE_NEW_OWNER', '(choose a new owner)'));
-					$addTo->push($df);
-				}
+                if ($this->checkPerm('TakeOwnership')) {
+                    $df = DropdownField::create('OwnerID', _t('Restrictable.OWNER', 'Owner'), DataObject::get('Member')->map('ID', 'Title'));
+                    $df->setEmptyString(_t('RestrictedObjects.CHOOSE_NEW_OWNER', '(choose a new owner)'));
+                    $addTo->push($df);
+                }
 
-				if ($this->owner->checkPerm('DeletePermissions')) {
-					$perms[] = 'delete';
-				}
+                if ($this->owner->checkPerm('DeletePermissions')) {
+                    $perms[] = 'delete';
+                }
 
-				if ($listField) {
-					$addTo->push($listField);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Set default for inherit
-	 *
-	 * @param FieldSet $fields
-	 */
-	public function updateFrontEndFields(FieldList $fields) {
-		if (!$this->owner->ID) {
-			$fields->replaceField('InheritPerms',new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions'), true));
-		}
-		
-		$ownerField = $fields->fieldByName('OwnerID');
-		if ($ownerField) {
-			$members = singleton('DataService')->getAllMember();
-			$source = array();
-			if ($members) {
-				$source = $members->map();
-			}
-			if (method_exists($ownerField, 'setSource')) {
-				$ownerField->setSource($source);
-			}
-		}
-	}
+                if ($listField) {
+                    $addTo->push($listField);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Set default for inherit
+     *
+     * @param FieldSet $fields
+     */
+    public function updateFrontEndFields(FieldList $fields)
+    {
+        if (!$this->owner->ID) {
+            $fields->replaceField('InheritPerms', new CheckboxField('InheritPerms', _t('Restrictable.INHERIT_PERMS', 'Inherit Permissions'), true));
+        }
+        
+        $ownerField = $fields->fieldByName('OwnerID');
+        if ($ownerField) {
+            $members = singleton('DataService')->getAllMember();
+            $source = array();
+            if ($members) {
+                $source = $members->map();
+            }
+            if (method_exists($ownerField, 'setSource')) {
+                $ownerField->setSource($source);
+            }
+        }
+    }
 
-	/**
-	 * handles SiteTree::canAddChildren, useful for other types too
-	 */
-	public function canAddChildren() {
-		if ($this->checkPerm('CreateChildren')) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * handles SiteTree::canAddChildren, useful for other types too
+     */
+    public function canAddChildren()
+    {
+        if ($this->checkPerm('CreateChildren')) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	public function onBeforeWrite() {
-		if (self::$enabled) {
-			try {
-				singleton('PermissionService')->clearPermCacheFor($this->owner);
-				// see if we're actually allowed to do this!
-				
-				// track whether a new node has parents to inherit perms from. We use this to determine
-				// whether to allow/disallow assigning current user as owner
-				$newNodeParentsCan = false;
-				if (!$this->owner->ID) {
-					$parents = singleton('PermissionService')->getEffectiveParents($this->owner);
-					if ($parents && count($parents)) {
-						foreach ($parents as $parent) {
-							// check create children
-							if ($parent->hasMethod('canAddChildren') && !$parent->canAddChildren()) {
-								throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
-							}
-						}
-						$newNodeParentsCan = true;
-					}
-				}
+    public function onBeforeWrite()
+    {
+        if (self::$enabled) {
+            try {
+                singleton('PermissionService')->clearPermCacheFor($this->owner);
+                // see if we're actually allowed to do this!
 
-				// get the changed items first
-				$changed = $this->owner->getChangedFields(false, 2);
-				
-				$allowWrite = false;
+                // track whether a new node has parents to inherit perms from. We use this to determine
+                // whether to allow/disallow assigning current user as owner
+                $newNodeParentsCan = false;
+                if (!$this->owner->ID) {
+                    $parents = singleton('PermissionService')->getEffectiveParents($this->owner);
+                    if ($parents && count($parents)) {
+                        foreach ($parents as $parent) {
+                            // check create children
+                            if ($parent->hasMethod('canAddChildren') && !$parent->canAddChildren()) {
+                                throw new PermissionDeniedException('CreateChildren', "Cannot create " . $this->owner->ClassName . " under " . $parent->ClassName . " #$parent->ID");
+                            }
+                        }
+                        $newNodeParentsCan = true;
+                    }
+                }
 
-				// set the owner now so that our perm check in a second works.
-				if (!$this->owner->OwnerID && singleton('SecurityContext')->getMember()) {
-					$this->owner->OwnerID = singleton('SecurityContext')->getMember()->ID;
-					// ignore any changed fields setting for this field
-					unset($changed['OwnerID']);
-					
-					// if this is a new node, and its parents didn't fail (ie $newNodeParentsCan wasn't evaluated)
-					if (!$newNodeParentsCan) {
-						$allowWrite = true;
-					}
-				} else if (!$this->owner->OwnerID && $this->owner instanceof Member) {
-					// allow the write to occur
-					unset($changed['OwnerID']);
-					$allowWrite = true;
-				}
+                // get the changed items first
+                $changed = $this->owner->getChangedFields(false, 2);
+                
+                $allowWrite = false;
 
-				// don't allow write
-				if (!$allowWrite && !$this->checkPerm('Write')) {
-					throw new PermissionDeniedException('Write', 'You must have write permission to ' . $this->owner->ClassName . ' #' . $this->owner->ID);
-				}
+                // set the owner now so that our perm check in a second works.
+                if (!$this->owner->OwnerID && singleton('SecurityContext')->getMember()) {
+                    $this->owner->OwnerID = singleton('SecurityContext')->getMember()->ID;
+                    // ignore any changed fields setting for this field
+                    unset($changed['OwnerID']);
+                    
+                    // if this is a new node, and its parents didn't fail (ie $newNodeParentsCan wasn't evaluated)
+                    if (!$newNodeParentsCan) {
+                        $allowWrite = true;
+                    }
+                } elseif (!$this->owner->OwnerID && $this->owner instanceof Member) {
+                    // allow the write to occur
+                    unset($changed['OwnerID']);
+                    $allowWrite = true;
+                }
 
-				$fields = $this->fieldPermissions();
+                // don't allow write
+                if (!$allowWrite && !$this->checkPerm('Write')) {
+                    throw new PermissionDeniedException('Write', 'You must have write permission to ' . $this->owner->ClassName . ' #' . $this->owner->ID);
+                }
 
-				foreach ($changed as $field => $details) {
-					if (isset($fields[$field])) {
-						// check the permission
-						if (!$this->checkPerm($fields[$field])) {
-							// this should never happen because the field should not be visible for editing 
-							// in the first place. 
-							throw new PermissionDeniedException($fields[$field], "Invalid permissions to edit $field, " . $fields[$field] . " required");
-						}
-					}
-				}
-			} catch (PermissionDeniedException $pde) {
-				// make sure there's a site config before triggering permissionFailure.
-				singleton('TransactionManager')->runAsAdmin(function () {
-					SiteConfig::current_site_config();
-				});
-				Security::permissionFailure();
-				throw $pde;
-			}
-		}
-	}
+                $fields = $this->fieldPermissions();
+
+                foreach ($changed as $field => $details) {
+                    if (isset($fields[$field])) {
+                        // check the permission
+                        if (!$this->checkPerm($fields[$field])) {
+                            // this should never happen because the field should not be visible for editing 
+                            // in the first place. 
+                            throw new PermissionDeniedException($fields[$field], "Invalid permissions to edit $field, " . $fields[$field] . " required");
+                        }
+                    }
+                }
+            } catch (PermissionDeniedException $pde) {
+                // make sure there's a site config before triggering permissionFailure.
+                singleton('TransactionManager')->runAsAdmin(function () {
+                    SiteConfig::current_site_config();
+                });
+                Security::permissionFailure();
+                throw $pde;
+            }
+        }
+    }
 }

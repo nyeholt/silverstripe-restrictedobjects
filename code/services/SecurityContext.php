@@ -7,42 +7,46 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class SecurityContext implements TemplateGlobalProvider {
-	
-	protected $currentMember;
-	
-	public function __construct() {
-
-	}
-	
-	public function getMember() {
-		if (!$this->currentMember) {
-			// need to allow member to write itself before it's fully loaded...
-			$curr = Restrictable::set_enabled(false);
-			if (Member::currentUserID()) {
-				$this->currentMember = Member::currentUser();
-			} else {
-				// ignore this for now!
+class SecurityContext implements TemplateGlobalProvider
+{
+    
+    protected $currentMember;
+    
+    public function __construct()
+    {
+    }
+    
+    public function getMember()
+    {
+        if (!$this->currentMember) {
+            // need to allow member to write itself before it's fully loaded...
+            $curr = Restrictable::set_enabled(false);
+            if (Member::currentUserID()) {
+                $this->currentMember = Member::currentUser();
+            } else {
+                // ignore this for now!
 //				$this->currentMember = singleton('PublicMember');
-			}
-			Restrictable::set_enabled($curr);
-		}
-		return $this->currentMember;
-	}
+            }
+            Restrictable::set_enabled($curr);
+        }
+        return $this->currentMember;
+    }
 
-	public function setMember($member) {
-		$this->currentMember = $member;
-	}
-	
-	public static function ContextUser() {
-		$securityContext = Injector::inst()->get('SecurityContext');
-		return $securityContext->getMember();
-	}
+    public function setMember($member)
+    {
+        $this->currentMember = $member;
+    }
+    
+    public static function ContextUser()
+    {
+        $securityContext = Injector::inst()->get('SecurityContext');
+        return $securityContext->getMember();
+    }
 
-	public static function get_template_global_variables() {
-		return array(
-			'ContextUser'
-		);
-	}
-
+    public static function get_template_global_variables()
+    {
+        return array(
+            'ContextUser'
+        );
+    }
 }
