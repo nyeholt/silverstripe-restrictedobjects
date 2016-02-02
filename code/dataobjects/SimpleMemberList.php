@@ -7,17 +7,19 @@
  * @author <marcus@silverstripe.com.au>
  * @license BSD License http://www.silverstripe.org/bsd-license
  */
-class SimpleMemberList extends DataObject implements ListOfMembers {
-	private static $db = array(
-		'Title'		=> 'Varchar(255)',
-		
-	);
+class SimpleMemberList extends DataObject implements ListOfMembers
+{
+    private static $db = array(
+        'Title'        => 'Varchar(255)',
+        
+    );
 
-	private static $many_many = array(
-		'Members'		=> 'Member',
-	);
-	
-	public function getAllMembers() {
-		return $this->Members();
-	}
+    private static $many_many = array(
+        'Members'        => 'Member',
+    );
+    
+    public function getAllMembers()
+    {
+        return $this->Members();
+    }
 }
