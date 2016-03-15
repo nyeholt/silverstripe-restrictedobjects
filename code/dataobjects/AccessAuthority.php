@@ -74,8 +74,8 @@ class AccessAuthority extends DataObject
         
         $dummy = singleton('AccessAuthority');
 
-        $members = new CheckboxSetField('Members', _t('AccessAuthority.MEMBERS', 'Members'), DataObject::get('Member'));
-        $groups = new CheckboxSetField('Groups', _t('AccessAuthority.GROUPS', 'Groups'), DataObject::get('Group'));
+        $members = new CheckboxSetField('Members', _t('AccessAuthority.MEMBERS', 'Members'), Member::get()->map()->toArray());
+        $groups = new CheckboxSetField('Groups', _t('AccessAuthority.GROUPS', 'Groups'), Group::get()->map()->toArray());
 
         $allRoles = DataObject::get('AccessRole');
         if ($allRoles) {
