@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Description of MemberLoginFilter
- *
  * @author marcus
  */
 class MemberLoginFilter implements RequestFilter
@@ -25,7 +23,8 @@ class MemberLoginFilter implements RequestFilter
     {
         if (strtolower($request->httpMethod()) === 'post' && (
             $request->getURL() === 'Security/LoginForm' ||
-            $request->getURL() === 'Security/LostPasswordForm'
+            $request->getURL() === 'Security/LostPasswordForm' ||
+            $request->getURL() === 'Security/ChangePasswordForm' 
             )) {
             Restrictable::set_enabled(false);
         }
