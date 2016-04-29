@@ -23,7 +23,10 @@ class MemberLoginFilter implements RequestFilter
      */
     public function preRequest(\SS_HTTPRequest $request, \Session $session, \DataModel $model)
     {
-        if (strtolower($request->httpMethod()) === 'post' && $request->getURL() === 'Security/LoginForm') {
+        if (strtolower($request->httpMethod()) === 'post' && (
+            $request->getURL() === 'Security/LoginForm' ||
+            $request->getURL() === 'Security/LostPasswordForm'
+            )) {
             Restrictable::set_enabled(false);
         }
     }
