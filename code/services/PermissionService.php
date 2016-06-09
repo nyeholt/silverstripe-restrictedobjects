@@ -303,6 +303,21 @@ class PermissionService
      */
     public function checkPerm(DataObject $node, $perm, $member=null)
     {
+        // if the node doesn't use the extension, fall back to SS logic
+        if (!$node->hasExtension('Restrictable')) 
+        {
+            switch ($perm) {
+                case 'View': {
+                    return $node->canView($member);
+                }
+                case 'Write': {
+                    return $node->canEdit($member);
+                }
+                default: {
+                    return $node->can($perm, $member);
+                }
+            }
+        }
         if (!$node) {
             return false;
         }
