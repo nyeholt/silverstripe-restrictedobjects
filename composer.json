@@ -1,5 +1,5 @@
 {
-	"name": "silverstripe/restrictedobjects",
+	"name": "symbiote/silverstripe-restrictedobjects",
 	"description": "Provides more advanced permission management for data objects in SilverStripe.",
 	"type": "silverstripe-module",
 	"keywords": ["silverstripe", "permissions"],
@@ -7,17 +7,18 @@
 	"authors": [
 	{
 		"name": "Marcus Nyeholt",
-		"email": "marcus@silverstripe.com.au"
+		"email": "marcus@symbiote.com.au"
 	}
 	],
 	"require":
 	{
 		"silverstripe/cms": ">=3.0.0",
-		"silverstripe/multivaluefield": "~2.0"
+		"symbiote/silverstripe-multivaluefield": "~2.4"
 	},
 	"extra": {
+		"installer-name": "restrictedobjects",
 		"branch-alias": {
-			"dev-master": "2.5.x-dev"
+			"dev-master": "3.0.x-dev"
 		}
 	}
 }
