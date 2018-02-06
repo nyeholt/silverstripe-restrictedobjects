@@ -336,7 +336,12 @@ class Restrictable extends DataExtension
                 singleton('TransactionManager')->runAsAdmin(function () {
                     SiteConfig::current_site_config();
                 });
-                Security::permissionFailure();
+                if (Controller::has_curr()) {
+                    Security::permissionFailure();
+                } else {
+                    SS_Log::log($pde, SS_Log::WARN);
+                }
+                
                 throw $pde;
             }
         }
