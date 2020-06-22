@@ -3,31 +3,31 @@
 /**
  * A wrapper around DataObject:: static methods that perform proper security checks
  * when loading objects
- * 
+ *
  *
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class DataService
 {
-    
+
     /**
-     * Shortcut for loading objects. 
-     * 
+     * Shortcut for loading objects.
+     *
      * Instead of $data->get('Type', 'Filter');
-     * 
+     *
      * you can simply call
-     * 
+     *
      * $data->Type('filter');
      *
      * @param type $method
-     * @param type $arguments 
+     * @param type $arguments
      */
     public function __call($method, $arguments)
     {
         $type = null;
         $call = null;
-        
+
         if (strpos($method, 'getOne') === 0) {
             $call = 'getOne';
         } elseif (strpos($method, 'getAll') === 0) {
@@ -46,16 +46,16 @@ class DataService
         }
         throw new Exception("Cannot get objects of unknown type in $method");
     }
-    
+
     /**
-     * 
+     *
      * Retrieve a list of data objects
-     * 
+     *
      * @see DataObject::get()
      *
      * @param type $callerClass
      * @param string|array $filter
-     *			
+     *
      * @param type $sort
      * @param type $join
      * @param type $limit
@@ -100,12 +100,12 @@ class DataService
         if ($item && $item->hasExtension('Restrictable') && $item->checkPerm($requiredPerm)) {
             return $item;
         }
-        
+
         if ($item && !$item->hasExtension('Restrictable') && $item->canView()) {
             return $item;
         }
     }
-    
+
     /**
      * A reimplementation of DataObject::instance_get
      *
@@ -150,7 +150,7 @@ class DataService
                 }
             }
         }
-        
+
         $unrestrictedCount = $list->count();
 
         $ret = $this->filterList($list, $requiredPerm);
@@ -188,17 +188,17 @@ class DataService
                     break;
                 }
             }
-            
+
             $ret->QueryOffset = $nextOffset;
         }
 
         return $ret;
     }
-    
+
     /**
      * Filter the given list to return the accessible objects
-     * 
-     * @param type $list 
+     *
+     * @param type $list
      */
     protected function filterList($list, $perm)
     {
@@ -217,7 +217,7 @@ if (!function_exists('lcfirst')) {
     function lcfirst($str)
     {
         if (strlen($str) > 0) {
-            return strtolower($str{0}) . substr($str, 1);
+            return strtolower($str[0]) . substr($str, 1);
         }
         return $str;
     }

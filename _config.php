@@ -12,7 +12,7 @@ Director::addRules(100, array(
 	'Security/logout' => 'RestrictedSecurityController',
 ));
 
-Object::add_extension('Member', 'RestrictedMember');
+Member::add_extension('Member', 'RestrictedMember');
 
 // if we're in Dev, and have set "no initial checks", which is common during testing, disable perms
 if ((Director::isDev() || Director::is_cli()) && isset($_GET['disable_perms'])) {
